@@ -2064,7 +2064,11 @@ document.getElementById('btnPlayers').addEventListener('click', () => {
   document.body.classList.add('panel-open');
   openPlayerIndex();
 });
-document.getElementById('ppClose').addEventListener('click', closePlayer);
+document.getElementById('ppClose').addEventListener('click', () => {
+  /* 从乐队页进入的乐手档案：返回到乐队页；直接打开的 PLAYERS：整窗关闭 */
+  if (bpOpen) closePlayer();
+  else deselect();
+});
 document.getElementById('ppBack').addEventListener('click', () => {
   if (ppFromIndex) openPlayerIndex();
   else closePlayer();
