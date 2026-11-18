@@ -383,6 +383,95 @@ body.panel-open .legend{opacity:.55}
   .p-long{font-size:12.5px;line-height:1.85}
 }
 </style>
+<style>
+/* ========== 三轨律动 ========== */
+.steps{--rowgap:3px}
+.step-row[data-trk="bass"] b,.step-row[data-trk="gtr"] b{color:rgba(255,255,255,.46)}
+.cell.b{background:rgba(255,210,120,.30)}
+.cell.bL{background:rgba(255,210,120,.62);box-shadow:inset 0 0 0 1px rgba(255,210,120,.5)}
+.cell.B{background:#ffd27a;box-shadow:0 0 8px rgba(255,210,120,.8)}
+.cell.g{background:rgba(120,220,255,.24)}
+.cell.gm{background:rgba(120,220,255,.16);box-shadow:inset 0 0 0 1px rgba(120,220,255,.30)}
+.cell.go{background:rgba(120,220,255,.55)}
+.cell.G{background:#7fdcff;box-shadow:0 0 9px rgba(127,220,255,.75)}
+.cell.hit{background:#fff!important;box-shadow:0 0 12px #fff;transform:scaleY(1.18)}
+.trk-toggles{display:flex;align-items:center;gap:7px;margin-top:11px;flex-wrap:wrap}
+.trk{display:flex;align-items:center;gap:6px;height:26px;padding:0 11px;border-radius:13px;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--faint);
+  font-family:inherit;font-size:10.5px;letter-spacing:.08em;cursor:pointer;transition:.18s}
+.trk i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;transition:.18s}
+.trk.on{color:var(--fg);border-color:rgba(255,255,255,.26);background:rgba(255,255,255,.07)}
+.trk.on i{opacity:1;box-shadow:0 0 8px currentColor}
+.trk[data-trk-toggle="bass"].on{color:#ffd27a}
+.trk[data-trk-toggle="gtr"].on{color:#7fdcff}
+.trk-hint{margin-left:auto;font-size:9.5px;letter-spacing:.06em;color:var(--faint)}
+
+/* ========== 乐手卡片（流派面板内） ========== */
+.plys{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media (max-width:720px){ .plys{grid-template-columns:1fr 1fr} }
+.ply{display:block;text-align:left;padding:11px 12px 10px;border-radius:11px;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.085);background:rgba(255,255,255,.035);font-family:inherit;
+  color:inherit;cursor:pointer;transition:.2s}
+.ply::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--fam);opacity:0;transition:.2s}
+.ply:hover{background:rgba(255,255,255,.075);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+.ply:hover::after{opacity:1}
+.pl-inst{display:flex;align-items:center;justify-content:space-between;font-size:9px;letter-spacing:.16em;
+  color:var(--fam);opacity:.85;margin-bottom:6px}
+.pl-inst em{font-style:normal;color:var(--faint);letter-spacing:.06em}
+.ply b{display:block;font-size:13px;font-weight:600;letter-spacing:.01em;line-height:1.25}
+.pl-cn{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
+.ply p{margin:7px 0 0;font-size:10.5px;line-height:1.6;color:#8e97ad;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pl-go{display:block;margin-top:8px;font-size:9.5px;letter-spacing:.14em;color:var(--fam);opacity:.75}
+
+/* ========== 乐手二级页 ========== */
+.pl-mark{margin:16px 0 0;padding:13px 15px;border-left:2px solid var(--fam);background:rgba(255,255,255,.035);
+  border-radius:0 9px 9px 0;font-size:14px;line-height:1.65;color:var(--fg);letter-spacing:.01em}
+.pl-bio p{margin:0 0 13px;font-size:12.6px;line-height:1.92;color:#aab3c7}
+.pl-bio p:first-child::first-letter{font-size:28px;line-height:1;color:var(--fam);font-weight:600;
+  margin-right:5px;float:left;padding-top:5px}
+.bp-people button{display:inline-flex;align-items:center;gap:5px;margin:0 5px 6px 0;padding:5px 10px;
+  border-radius:7px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);
+  color:var(--fg);font-family:inherit;font-size:11px;cursor:pointer;transition:.18s}
+.bp-people button:hover{border-color:var(--fam);background:rgba(255,255,255,.08)}
+.bp-people button small{font-size:8.5px;letter-spacing:.1em;color:var(--fam);opacity:.85}
+.idx{display:flex;flex-direction:column;gap:16px;margin-top:6px}
+.idx-g .bp-rel{margin-top:8px}
+.results button i.rd{border-radius:50%}
+
+/* ========== 移动端：抽屉可拖拽延伸到全屏 ========== */
+.p-grab{display:none}
+@media (max-width:720px){
+  .p-grab{display:flex;align-items:center;justify-content:center;height:20px;margin:-4px 0 2px;
+    touch-action:none;cursor:grab}
+  .p-grab i{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.24);transition:.2s}
+  .panel.dragging{transition:none!important;will-change:height,transform}
+  .panel.dragging .p-grab i,.panel.full .p-grab i{width:56px;background:rgba(255,255,255,.42)}
+  .panel.full{height:100dvh!important;max-height:100dvh;border-radius:0!important;border-left:none;border-right:none}
+  .panel.full::before{display:none}
+  .panel.full .p-body{padding-bottom:max(28px,env(safe-area-inset-bottom))}
+  body.panel-full .tb-year{opacity:.5}
+  .band-page.full,.band-page{inset:0}
+  .plys{grid-template-columns:1fr}
+  .ply{padding:12px 13px}
+  .ply p{-webkit-line-clamp:3}
+  .pl-mark{font-size:13px;padding:11px 13px}
+  .pl-bio p{font-size:12.2px}
+  .trk-toggles{gap:6px}
+  .trk{height:28px;padding:0 12px;font-size:11px}
+  .trk-hint{width:100%;margin-left:0;order:9}
+  nav button{padding:0 8px;font-size:9.5px;letter-spacing:.04em;height:28px}
+  .head nav{gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:60%}
+  .search-wrap{top:82px}
+  .legend{top:122px}
+}
+@media (max-width:380px){
+  nav button{padding:0 6px;font-size:9px}
+}
+@media (max-width:400px){
+  .plys{grid-template-columns:1fr}
+}
+</style>
 
 </head>
 <body>
@@ -398,18 +487,19 @@ body.panel-open .legend{opacity:.55}
 <header class="ui head">
   <div>
     <h1><b>ROCK ATLAS</b><em>摇滚谱系城市</em>
-      <span class="sub">41 个流派 · 88 支乐队 · 一条从布鲁斯长到 djent 的年轮</span>
+      <span class="sub">41 个流派 · 88 支乐队 · 37 位乐手 · 一条从布鲁斯长到 djent 的年轮</span>
     </h1>
   </div>
   <nav>
     <button id="btnHome" title="回到全景">HOME</button>
     <button id="btnBands" title="全部乐队档案">BANDS</button>
+    <button id="btnPlayers" title="吉他英雄与乐手档案">PLAYERS</button>
     <button id="btnAbout" title="关于这张图">ABOUT</button>
   </nav>
 </header>
 
 <div class="ui search-wrap">
-  <input id="search" type="text" placeholder="搜索流派 / 乐队 / 曲目…" autocomplete="off" spellcheck="false">
+  <input id="search" type="text" placeholder="搜索流派 / 乐队 / 乐手 / 曲目…" autocomplete="off" spellcheck="false">
   <div class="results" id="results"></div>
 </div>
 
@@ -433,11 +523,12 @@ body.panel-open .legend{opacity:.55}
   <button class="ac-x" title="停止试听">×</button>
 </div>
 
-<div class="ui hint" id="hint">拖动旋转 · 滚轮缩放<br>点击街区看流派谱系</div>
+<div class="ui hint" id="hint">拖动旋转 · 滚轮缩放<br>点击街区看流派谱系与乐手</div>
 <div class="ui credit">谱系 / 曲目为人工整理，鼓点为实时合成 · 非录音</div>
 
 <aside class="ui panel" id="panel">
   <button class="p-close" id="btnClose" title="关闭">×</button>
+  <div class="p-grab" id="pGrab" aria-label="拖动调整高度"><i></i></div>
   <div class="p-scroll" id="pScroll"></div>
 
   <div class="band-page" id="bandPage">
@@ -447,6 +538,14 @@ body.panel-open .legend{opacity:.55}
       <button class="bp-close" id="bpClose" title="关闭">×</button>
     </div>
     <div class="p-scroll" id="bpScroll"></div>
+  </div>
+  <div class="band-page" id="playerPage">
+    <div class="bp-head">
+      <button class="bp-back" id="ppBack">‹</button>
+      <span class="bp-crumb" id="ppCrumb">PLAYER</span>
+      <button class="bp-close" id="ppClose" title="关闭">×</button>
+    </div>
+    <div class="p-scroll" id="ppScroll"></div>
   </div>
 </aside>
 
@@ -949,8 +1048,9 @@ function deselect(closeOnly){
     if (p.el) p.el.classList.remove('sel');
   }
   state.sel = null;
-  panel.classList.remove('open');
-  document.body.classList.remove('panel-open');
+  panel.classList.remove('open','full');
+  document.body.classList.remove('panel-open','panel-full');
+  panel.style.height = ''; panel.style.transform = '';
   Beat.stop();
   if (!closeOnly) flyTo(HOME.target.clone(), HOME.dist, HOME.polar, HOME.az, 1.5);
 }
@@ -968,14 +1068,101 @@ const DRUM_CN = { kick:'大鼓', snare:'军鼓', hat:'踩镲', openhat:'开镲',
 let stepCells = [];
 let curStep = -1;
 
+/* ===== 三轨律动表：贝斯音高型 + 吉他节奏型 =====
+   bass: R=根音 r=根音(长) 3/4=三度 5=五度 7=小七 8=八度 b=降五 .=休止
+   gtr : x=强力和弦 X=重音 m=闷音 o=开放长音 .=休止
+   root: MIDI 根音 */
+const GROOVE = {
+  /* roots */
+  'delta-blues':      ['R..R..5.r..5..R.', '..x...x...x...x.', 40],
+  'chicago-blues':    ['R..R5..R..R..5..', '.x..x..x..x..x..', 33],
+  'rockabilly':       ['R.R.R.R.R.R.R.R.', 'xxx...xxx...xxx.', 38],
+  'surf-rock':        ['R.......5.......', '..o.o...o.o.o...', 40],
+  'garage-rock':      ['RRRRRRRRRRRRRRRR', 'x.x.x.x.x.x.x.x.', 40],
+  /* core */
+  'rock-and-roll':    ['R..R..5.R..R..5.', '..x..x..x..x..x.', 33],
+  'merseybeat':       ['R...5...R...5...', '.x..x..x.x..x..x', 43],
+  'blues-rock':       ['R..R..5.R..5..R.', 'x..x..x...x..x..', 40],
+  'psych-rock':       ['R.....5.R.....5.', 'o.......o.....o.', 38],
+  'prog-rock':        ['R.R.5.R.8.R.5.R.', '..m.m...m.m.m...', 33],
+  'classic-rock':     ['R.R.R.R.R.R.R.R.', 'x..x..x.x..x..x.', 40],
+  'glam-rock':        ['R.R.RR.R.R.RR.R.', 'x.xx.xx.x.xx.xx.', 40],
+  /* punk */
+  'punk':             ['RRRRRRRRRRRRRRRR', 'xxxxxxxxxxxxxxxx', 45],
+  'hardcore-punk':    ['RRRRRRRRRRRRRRRR', 'XXXXXXXXXXXXXXXX', 45],
+  'post-punk':        ['R..5..R..R..5...', '..m...m...m...m.', 33],
+  'new-wave':         ['R.R.R.R.R.R.R.R.', '.m.m.m.m.m.m.m.m', 36],
+  'grunge':           ['R.....5.R...5...', 'x.....x.x...x...', 38],
+  'alt-rock':         ['R..R.R..5..R.R..', '..x..x...x..x...', 40],
+  /* metal */
+  'heavy-metal':      ['RR..RR..RR..RR..', 'x.x.x.x.x.x.x.x.', 28],
+  'nwobhm':           ['RRR.RRR.RRR.RRR.', 'x.xx.xx.x.xx.xx.', 28],
+  'thrash':           ['RRRRRRRRRRRRRRRR', 'xxxxxxxxxxxxxxxx', 28],
+  'death-metal':      ['RRRRRRRRRRRRRRRR', 'mmmmmmmmmmmmmmmm', 26],
+  'black-metal':      ['RRRRRRRRRRRRRRRR', 'mmmmmmmmmmmmmmmm', 26],
+  'doom-metal':       ['R.......5.......', 'o.......o.......', 24],
+  'power-metal':      ['RRRRRRRRRRRRRRRR', 'x.x.x.x.x.x.x.x.', 40],
+  'glam-metal':       ['R.R.R.R.R.R.R.R.', 'x.x.x.x.x.x.x.x.', 40],
+  'groove-metal':     ['R..R..R.R..R..R.', '.x..x..x.x..x..x', 26],
+  'nu-metal':         ['R...R...5...5...', 'm...m...m...m...', 26],
+  'metalcore':        ['RR..RR..RR..RR..', 'mm..mm..mm..mm..', 28],
+  'industrial-metal': ['R.R.R.R.R.R.R.R.', 'x.x.x.x.x.x.x.x.', 28],
+  'prog-metal':       ['R.R5R.R8R.R5R.R.', '..m.m.m.m.m.m...', 33],
+  'djent':            ['R..R.R...R..R.R.', 'm.m..m.m.m..m.m.', 26],
+  /* fusion */
+  'jazz-fusion':      ['R..5..8..7..5...', '..m...m...m...m.', 33],
+  'funk-rock':        ['R.RR..R.R.RR..R.', '..m.m.m...m.m.m.', 33],
+  'math-rock':        ['R.R.R..R.R..R.R.', '..m.m..m.m..m...', 38],
+  'post-rock':        ['R...............', 'o.......o.......', 40],
+  'city-pop':         ['R..R.5..R..R.5..', '..m..m..m..m..m.', 38],
+  /* world */
+  'afrobeat':         ['R..5..R.R..5..R.', '..m...m.m...m...', 38],
+  'desert-blues':     ['R.......5.......', 'o.o.....o.o.....', 33],
+  'bossa-nova':       ['R..5..R...R..5..', '..m...m...m...m.', 40],
+  'ska':              ['R.R.R.R.R.R.R.R.', '..x...x...x...x.', 40]
+};
+const FAM_GROOVE = {
+  roots:  ['R..R..5.R..5..R.', '..x...x...x...x.', 40],
+  core:   ['R.R.R.R.R.R.R.R.', 'x..x..x.x..x..x.', 38],
+  punk:   ['RRRRRRRRRRRRRRRR', 'xxxxxxxxxxxxxxxx', 45],
+  metal:  ['RR..RR..RR..RR..', 'x.x.x.x.x.x.x.x.', 28],
+  fusion: ['R..5..R..R..5..R.', '..m...m...m...m.', 33],
+  world:  ['R..5..R.R..5..R.', '..m...m.m...m...', 38]
+};
+function grooveOf(n){
+  const g = GROOVE[n.id] || FAM_GROOVE[n.fam] || FAM_GROOVE.core;
+  return { b: g[0], g: g[1], root: g[2] };
+}
+/* 步长不一致的谱型按比例取值 */
+function patAt(str, i, steps){
+  if (!str) return '.';
+  return str[Math.floor(i * str.length / steps) % str.length];
+}
+
 function stepsGrid(n){
   const keys = Object.keys(n.p || {});
   if (!keys.length) return '';
   const steps = n.steps || 16;
+  const gv = grooveOf(n);
+  const cellCls = (trk, ch) => {
+    if (ch === '.' || ch === '-' || !ch) return '';
+    if (trk === 'drum') return ch;
+    if (trk === 'bass') return ch === 'X' ? 'B' : (/^[a-z]$/.test(ch) ? 'bL' : 'b');
+    return ch === 'X' ? 'G' : ch === 'o' ? 'go' : ch === 'm' ? 'gm' : 'g';
+  };
+  const row = (label, str, trk) => `<div class="step-row" data-trk="${trk}"><b>${label}</b><div class="step-cells" style="grid-template-columns:repeat(${steps},1fr)">
+      ${Array.from({ length: steps }, (_, i) => `<div class="cell ${cellCls(trk, patAt(str, i, steps))}"></div>`).join('')}
+    </div></div>`;
   return `<div class="steps" style="--n:${steps}" data-steps="${steps}">
-    ${keys.map(k => `<div class="step-row"><b>${DRUM_CN[k] || k}</b><div class="step-cells" style="grid-template-columns:repeat(${steps},1fr)">
-      ${(n.p[k] || '').padEnd(steps, '.').slice(0, steps).split('').map(ch => `<div class="cell ${ch === '.' || ch === '-' ? '' : ch}"></div>`).join('')}
-    </div></div>`).join('')}
+    ${keys.map(k => row(DRUM_CN[k] || k, n.p[k], 'drum')).join('')}
+    ${row('贝斯', gv.b, 'bass')}
+    ${row('吉他', gv.g, 'gtr')}
+  </div>
+  <div class="trk-toggles">
+    <button class="trk${TRK.drum ? ' on' : ''}" data-trk-toggle="drum"><i class="k"></i>鼓</button>
+    <button class="trk${TRK.bass ? ' on' : ''}" data-trk-toggle="bass"><i class="b"></i>贝斯</button>
+    <button class="trk${TRK.gtr ? ' on' : ''}" data-trk-toggle="gtr"><i class="g"></i>吉他</button>
+    <span class="trk-hint">点标签可独奏 / 静音</span>
   </div>`;
 }
 
@@ -1058,6 +1245,8 @@ function renderPanel(n){
       </button>`).join('')}
     </div>` : ''}
 
+    ${playersBlock(n)}
+
     <div class="p-sec">Chronicle · 编年史<span class="sec-n">${(n.ch||[]).length} 章</span></div>
     <div class="chron">
       ${(n.ch || []).map((c, i) => `
@@ -1123,6 +1312,17 @@ function renderPanel(n){
   pScroll.querySelectorAll('[data-band]').forEach(li => {
     li.addEventListener('click', () => openBand(li.dataset.band, n.id));
   });
+  pScroll.querySelectorAll('[data-player]').forEach(li => {
+    li.addEventListener('click', () => openPlayer(li.dataset.player));
+  });
+  pScroll.querySelectorAll('[data-trk-toggle]').forEach(li => {
+    li.addEventListener('click', () => {
+      const k = li.dataset.trkToggle;
+      TRK[k] = !TRK[k];
+      li.classList.toggle('on', TRK[k]);
+      if (!TRK.drum && !TRK.bass && !TRK.gtr && Beat.on) Beat.stop();
+    });
+  });
   pScroll.scrollTop = 0;
 }
 
@@ -1163,7 +1363,10 @@ function openBand(id, fromId){
     <div class="bp-hear">${b.hear.map((h, i) => `<div><b>${String(i + 1).padStart(2, '0')}</b><p>${esc(h)}</p></div>`).join('')}</div>` : ''}
 
     <div class="p-sec">Line-up · 阵容</div>
-    <div class="bp-people">${(b.members || []).map(m => `<span>${esc(m)}</span>`).join('')}</div>
+    <div class="bp-people">${(b.members || []).map(m => {
+      const pl = typeof playerByName === 'function' ? playerByName(m) : null;
+      return pl ? `<button data-player="${pl.id}">${esc(m)}<small>档案</small></button>` : `<span>${esc(m)}</span>`;
+    }).join('')}</div>
 
     <div class="p-sec">Story · 故事<span class="sec-n">${(b.story || []).length} 章 · 约 ${Math.max(1, Math.round((b.story || []).reduce((s, x) => s + x.t.length, 0) / 320))} 分钟</span></div>
     <div class="chron">
@@ -1191,6 +1394,9 @@ function openBand(id, fromId){
   `;
   bpScroll.querySelectorAll('[data-rel]').forEach(el => {
     el.addEventListener('click', () => { openBand(el.dataset.rel); bpScroll.scrollTop = 0; });
+  });
+  bpScroll.querySelectorAll('[data-player]').forEach(el => {
+    el.addEventListener('click', () => { openPlayer(el.dataset.player); });
   });
   bpScroll.scrollTop = 0;
   bandPage.classList.add('on');
@@ -1286,17 +1492,26 @@ function runSearch(){
   if (!q){ resultsEl.classList.remove('on'); resultsEl.innerHTML = ''; return; }
   const hits = searchIndex.filter(x => x.hay.includes(q)).slice(0, 6);
   const bhits = bandIndex.filter(x => x.hay.includes(q)).slice(0, 6);
+  const phits = playerIndex.filter(x => x.hay.includes(q)).slice(0, 6);
   const rows = [];
   hits.forEach(x => rows.push(`<button data-id="${x.n.id}"><i style="background:${famColor(x.n.fam)}"></i>${esc(x.n.cn)}<span>${x.n.y} 流派</span></button>`));
   bhits.forEach(x => {
     const g = byId[x.b.from];
     rows.push(`<button data-band="${x.b.id}" data-from="${x.b.from}"><i class="sq" style="background:${g ? famColor(g.fam) : '#ffb26b'}"></i>${esc(x.b.name)}<span>乐队故事 ›</span></button>`);
   });
+  phits.forEach(x => rows.push(`<button data-player="${x.p.id}"><i class="rd" style="background:${famColor((byId[x.p.genre] || {}).fam || '')}"></i>${esc(x.p.name)}<span>${INST_CN[x.p.inst] || ''} 档案 ›</span></button>`));
   resultsEl.innerHTML = rows.length ? rows.join('')
-    : `<button style="cursor:default;color:#5a637a">没有匹配的流派或乐队</button>`;
+    : `<button style="cursor:default;color:#5a637a">没有匹配的流派、乐队或乐手</button>`;
   resultsEl.classList.add('on');
   resultsEl.querySelectorAll('[data-id]').forEach(b => b.addEventListener('click', () => {
     select(b.dataset.id);
+    resultsEl.classList.remove('on');
+    searchEl.value = '';
+    searchEl.blur();
+  }));
+  resultsEl.querySelectorAll('[data-player]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.from) select(b.dataset.from);
+    openPlayer(b.dataset.player);
     resultsEl.classList.remove('on');
     searchEl.value = '';
     searchEl.blur();
@@ -1338,19 +1553,33 @@ const acName = acEl.querySelector('.ac-t b');
 const acSub = acEl.querySelector('.ac-t span');
 const hintEl = document.getElementById('hint');
 acEl.querySelector('.ac-x').addEventListener('click', () => Beat.stop());
+const NOTE_SEMI = { R:0, r:0, '2':2, '3':3, '4':4, b:6, '5':7, '6':9, '7':10, '8':12 };
+function midiHz(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+const TRK = { drum: true, bass: true, gtr: true };
 const Beat = (() => {
-  let ctx = null, master = null, noise = null;
+  let ctx = null, master = null, noise = null, curve = null;
   let timer = null, nextTime = 0, stepIdx = 0, stepDur = .125, steps = 16, swing = 0, pat = {};
+  let bPat = '', gPat = '', root = 40;
   let btn = null;
 
   function init(){
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .5; master.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = .40; master.connect(ctx.destination);
     const len = ctx.sampleRate * 1.2;
     noise = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = noise.getChannelData(0);
     for (let i=0;i<len;i++) d[i] = Math.random()*2 - 1;
+    const n = 2048; curve = new Float32Array(n);
+    for (let i=0;i<n;i++){
+      const x = i*2/n - 1;
+      curve[i] = Math.tanh(x*3.4) * .92;
+    }
+  }
+  function shaper(){
+    const s = ctx.createWaveShaper();
+    s.curve = curve; s.oversample = '2x';
+    return s;
   }
   function env(node, t, peak, dur){
     const g = node.gain;
@@ -1398,14 +1627,66 @@ const Beat = (() => {
       default: break;
     }
   }
+  /* 贝斯：锯齿 + 次八度三角，低通扫频 + 轻微失真 */
+  function bassNote(t, midi, dur, vel){
+    const f = midiHz(midi);
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f, t);
+    const sub = ctx.createOscillator(); sub.type = 'triangle'; sub.frequency.setValueAtTime(f/2, t);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 6;
+    lp.frequency.setValueAtTime(1500, t);
+    lp.frequency.exponentialRampToValueAtTime(240, t + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(.26*vel, t + .01);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(lp); sub.connect(lp);
+    lp.connect(shaper()).connect(g).connect(master);
+    o.start(t); sub.start(t); o.stop(t + dur + .04); sub.stop(t + dur + .04);
+  }
+  /* 吉他：三音强力和弦（根/五/八度），锯齿+方波失谐，失真 + 滤波 */
+  function gtrChord(t, midi, dur, vel, mute){
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime((mute ? .085 : .13) * vel, t + .006);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = mute ? 200 : 110;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 1.2;
+    lp.frequency.setValueAtTime(mute ? 1400 : 4200, t);
+    lp.frequency.exponentialRampToValueAtTime(mute ? 700 : 1800, t + dur);
+    hp.connect(shaper()).connect(lp).connect(g).connect(master);
+    [0, 7, 12].forEach((semi, i) => {
+      const o = ctx.createOscillator();
+      o.type = i === 0 ? 'sawtooth' : 'square';
+      o.frequency.setValueAtTime(midiHz(midi + semi), t);
+      o.detune.setValueAtTime((i - 1) * 6, t);
+      o.connect(hp); o.start(t); o.stop(t + dur + .03);
+    });
+  }
   function playStep(i, when){
     const sw = (i % 2 === 1) ? swing * .5 * stepDur : 0;
     const t = when + sw;
-    Object.keys(pat).forEach(k => {
-      const ch = (pat[k] || '')[i];
-      if (ch === 'x') hit(k, t, 1);
-      else if (ch === 'X') hit(k, t, 2);
-    });
+    if (TRK.drum){
+      Object.keys(pat).forEach(k => {
+        const ch = patAt(pat[k] || '', i, steps);
+        if (ch === 'x' || ch === 'X') hit(k, t, ch === 'X' ? 2 : 1);
+      });
+    }
+    if (TRK.bass){
+      const ch = patAt(bPat, i, steps);
+      const semi = NOTE_SEMI[ch];
+      if (semi != null){
+        const long = /^[a-z]$/.test(ch);
+        bassNote(t, root + semi, stepDur * (long ? 2.1 : 1.45), long ? 1.05 : .82);
+      }
+    }
+    if (TRK.gtr){
+      const ch = patAt(gPat, i, steps);
+      const base = root + 12;
+      if (ch === 'o') gtrChord(t, base, stepDur * 3.2, .8, false);
+      else if (ch === 'm') gtrChord(t, base, stepDur * .5, .78, true);
+      else if (ch === 'X') gtrChord(t, base, stepDur * .95, 1.15, false);
+      else if (ch === 'x') gtrChord(t, base, stepDur * .85, .9, false);
+    }
   }
   function scheduler(){
     while (nextTime < ctx.currentTime + .16){
@@ -1416,13 +1697,16 @@ const Beat = (() => {
   }
   return {
     on: false,
+    tracks: TRK,
     start(n, button){
       init();
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state !== 'running') ctx.resume();
       this.stop();
       steps = n.steps || 16; swing = n.swing || 0;
       stepDur = 60 / (n.bpm || 120) / 4;
       pat = n.p || {};
+      const gv = grooveOf(n);
+      bPat = gv.b; gPat = gv.g; root = gv.root;
       stepIdx = 0; nextTime = ctx.currentTime + .06;
       timer = setInterval(scheduler, 25);
       this.on = true;
@@ -1430,7 +1714,7 @@ const Beat = (() => {
       btn = button;
       acEl.style.setProperty('--fam', famColor(n.fam));
       acName.textContent = n.cn;
-      acSub.textContent = n.bpm + ' BPM · ' + (n.meter || '4/4') + ' · 实时合成';
+      acSub.textContent = n.bpm + ' BPM · ' + (n.meter || '4/4') + ' · 鼓 / 贝斯 / 吉他三轨实时合成';
       acEl.classList.add('on');
       if (hintEl) hintEl.style.opacity = 0;
       highlight(steps, stepDur, ctx, nextTime);
@@ -1586,6 +1870,305 @@ function smoothYear(){
     n.arcs.forEach(a => { a.mat.opacity = .34*k; });
   }
 }
+
+/* ================= 乐手 / 吉他英雄 ================= */
+const PLAYERS = {"jimi-hendrix":{"name":"Jimi Hendrix","cn":"吉米·亨德里克斯","inst":"guitar","life":"1942–1970","genre":"psych-rock","band":null,"mark":"把吉他变成噪音乐器的人","tags":["反馈","哇音","和弦化独奏"],"lead":"他不是在弹音符，是在把音箱推到啸叫边缘，然后把啸叫编成旋律。","bio":["西雅图出身，在军队里学会用电吉他制造噪音，1966 年被 Chas Chandler 带到伦敦，三个月内让 Clapton 和 Beck 都去看他演出。他左手按弦、右手同时控制摇把、音量和哇音踏板，把吉他当成一个可以随时失稳的电路。","1969 年伍德斯托克的《Star Spangled Banner》是他最公开的一次实验：用反馈、颤音和失真模拟空袭声与哭泣声。1970 年死于伦敦，年仅 27 岁，留下的四张正式专辑重新定义了电吉他能发出的声音范围。"],"style":[["反馈当素材","刻意把琴头靠近音箱逼出泛音反馈，再用摇把把反馈音高推上去，让噪音变成可控的旋律线。"],["和弦化独奏","独奏里大量加入九和弦、增和弦的色彩音，听起来像在弹和弦进行而不是跑音阶。"],["哇音与八度","哇音踏板踩在切分位置，配合 Octavia 八度效果器，制造出类似人声的元音变化。"]],"sig":[[1967,"Are You Experienced","《Purple Haze》把增和弦与失真写进了流行单曲。"],[1968,"Electric Ladyland","《Voodoo Chile》十五分钟的即兴，录音室当现场用。"],[1970,"Band of Gypsys","现场版《Machine Gun》，用反馈模拟枪声与哀鸣。"]],"gear":"Fender Stratocaster 反手琴、Marshall 100W 音箱、Fuzz Face、Uni-Vibe","rel":["eric-clapton","stevie-ray-vaughan"]},"jimmy-page":{"name":"Jimmy Page","cn":"吉米·佩奇","inst":"guitar","life":"1944–","genre":"blues-rock","band":"led-zeppelin","mark":"录音室里的编曲者","tags":["Riff 建筑","双轨叠加","布鲁斯改写"],"lead":"他的吉他不是伴奏，是整首歌的骨架：一个 riff 撑住四分钟，再在录音室里叠出十二轨。","bio":["伦敦 session 乐手出身，给 The Kinks、The Who 录过吉他。1968 年组建 Led Zeppelin，把芝加哥布鲁斯的句式拉慢、加重，写成《Whole Lotta Love》那种以 riff 为单位的结构。","他对录音室的理解超过同时代大多数人：把吉他分轨录两遍再左右分开，用房间话筒收鼓，用倒放和延迟做空间。《Kashmir》里的弦乐与吉他互相让位，是编曲而非炫技。"],"style":[["Riff 即结构","用短促的和弦动机反复推进，靠鼓的切分与停顿制造张力，而不是靠副歌。"],["双轨叠录","同一段吉他录两遍、左右各一轨，制造厚度；独奏时故意错开几毫秒，形成天然的合唱感。"],["布鲁斯重构","把三角洲布鲁斯的乐句拆开重排，加上失真与慢速律动，变成重金属的前身。"]],"sig":[[1969,"Led Zeppelin II","《Whole Lotta Love》的 riff 成为硬摇滚模板。"],[1971,"Led Zeppelin IV","《Black Dog》的错拍 riff 与《Stairway to Heaven》的层层推进。"],[1975,"Physical Graffiti","《Kashmir》用弦乐与吉他写出异域感。"]],"gear":"Gibson Les Paul、Marshall Super Lead、Supro 音箱、Theramin","rel":["tony-iommi","jimi-hendrix"]},"eric-clapton":{"name":"Eric Clapton","cn":"埃里克·克莱普顿","inst":"guitar","life":"1945–","genre":"blues-rock","band":"cream","mark":"把布鲁斯带进白人摇滚","tags":["布鲁斯推弦","音色克制","现场即兴"],"lead":"他证明了布鲁斯不需要吼，慢下来的推弦一样能让人起鸡皮疙瘩。","bio":["1965 年加入 John Mayall 的 Bluesbreakers，一张《Beano》专辑让伦敦墙上出现「Clapton is God」的涂鸦。随后组建 Cream，把布鲁斯延长成十分钟的即兴。","他的演奏以「少」著称：长音、慢推弦、留白。1970 年《Layla》用双吉他对位写尽求而不得，之后转向更内敛的《Tears in Heaven》与《Unplugged》，音色始终干净。"],"style":[["推弦的呼吸","大量使用全音推弦与预推，音符进入的时机比音高更重要，像人声换气。"],["留白","句与句之间留出明显空隙，让伴奏和鼓填补，避免连续跑句。"],["音色减法","中频突出、增益不高，靠手指力度控制动态，失真只在需要时推上去。"]],"sig":[[1966,"Blues Breakers with Eric Clapton","《Hideaway》定义了英式布鲁斯吉他音色。"],[1968,"Wheels of Fire","《Crossroads》现场版把布鲁斯推成硬摇滚。"],[1970,"Layla and Other Assorted Love Songs","双吉他对位与长段即兴的顶点。"]],"gear":"Fender Stratocaster「Blackie」、Gibson Les Paul、Vox AC30、Fender Tweed Twin","rel":["jimi-hendrix","jeff-beck"]},"jeff-beck":{"name":"Jeff Beck","cn":"杰夫·贝克","inst":"guitar","life":"1944–2023","genre":"blues-rock","band":null,"mark":"不用拨片的手指魔术师","tags":["指弹拨弦","摇把","无拨片"],"lead":"他几乎不用拨片，全靠手指和摇把，让电吉他发出类似小提琴的滑音。","bio":["接替 Clapton 进入 Yardbirds，随后组 Jeff Beck Group，与 Rod Stewart 一起把布鲁斯推向更重的方向。1975 年的《Blow by Blow》几乎全是器乐，由 George Martin 制作。","他的右手只用拇指与食指拨弦，能做出拨片做不到的细腻动态；左手摇把控制音高，几乎像在演奏弦乐。后期转向电子与融合，始终不重复自己。"],"style":[["指弹动态","用指肉而非拨片触弦，音量靠拨弦位置与力度控制，弱音段落极其细腻。"],["摇把歌唱","把摇把当成呼吸器官，长音上做微小的音高摆动，模拟人声颤音。"],["不按常理的音阶","独奏里混入减和弦与半音经过音，听起来像走调，其实是刻意的张力。"]],"sig":[[1968,"Truth","《Beck's Bolero》把失真与古典动机混在一起。"],[1975,"Blow by Blow","《Cause We've Ended as Lovers》的摇把长音。"],[1989,"Guitar Shop","《Where Were You》几乎不用拨片，全靠手指与摇把。"]],"gear":"Fender Stratocaster、Gibson Les Paul、Marshall 与 Fender 音箱","rel":["eric-clapton","jimi-hendrix"]},"david-gilmour":{"name":"David Gilmour","cn":"大卫·吉尔莫","inst":"guitar","life":"1946–","genre":"prog-rock","band":"pink-floyd","mark":"把独奏写成咏叹调","tags":["长音","推弦","空间感"],"lead":"他的独奏从不赶时间：一个音可以拖八小节，靠推弦和延迟把空间撑满。","bio":["1968 年加入 Pink Floyd，接替 Syd Barrett。他的演奏与乐队的概念专辑互相成就：《Dark Side of the Moon》里的《Time》独奏、《Wish You Were Here》的同名曲，都是先有情绪再有音符。","他偏爱用长音与延迟制造空旷感，独奏结构清晰：起句低、中段推高、结尾回落，像一段完整的叙述。他也擅长滑棒与踏板钢弦式的推弦。"],"style":[["长音叙述","用持续音与慢推弦建立情绪，一个乐句往往跨四到八小节，不急着落点。"],["延迟空间","依靠 Binson 磁带回声与长延迟，让单音在空间中反复回响，形成层次。"],["推弦精准","推弦到位后停住，让音高稳定地悬在半空，制造「悬而未决」的听感。"]],"sig":[[1973,"The Dark Side of the Moon","《Time》的独奏用最少的音写出最大的情绪。"],[1975,"Wish You Were Here","同名曲的四音动机与滑棒。"],[1979,"The Wall","《Comfortably Numb》两段独奏，情绪层层递进。"]],"gear":"Fender Stratocaster（黑 Strat）、Hiwatt 音箱、Big Muff、Binson Echorec","rel":["jimmy-page","brian-may"]},"tony-iommi":{"name":"Tony Iommi","cn":"托尼·艾欧米","inst":"guitar","life":"1948–","genre":"heavy-metal","band":"black-sabbath","mark":"重金属 riff 的发明者之一","tags":["降调","三全音","重 riff"],"lead":"工厂事故削掉了他两个指尖，他做了指套、把弦调松，于是有了重金属的声音。","bio":["在工厂做焊工时失去右手食指与中指的指尖，他用塑料指套继续弹琴，并把吉他降调、换细弦，让按弦更省力。降低的张力反而带来更沉、更钝的音色。","Black Sabbath 的第一张专辑用《Black Sabbath》的三全音 riff 定下了重金属的语法：慢、重、压迫。之后十年他几乎独自定义了这种音乐的和声与节奏模板。"],"style":[["三全音","大量使用增四度（魔鬼音程）制造不安感，《Black Sabbath》同名曲就是范例。"],["降调重音","把吉他降到 C# 或更低，让 riff 落在中低频，听起来像机器而不是乐器。"],["留白式重击","riff 之间故意留出空隙，让鼓与贝斯填补，重音落得更狠。"]],"sig":[[1970,"Black Sabbath","同名曲的三全音 riff 定义了重金属。"],[1970,"Paranoid","《Iron Man》的缓慢重击与《War Pigs》的行进感。"],[1973,"Sabbath Bloody Sabbath","把合成器与重 riff 结合。"]],"gear":"Gibson SG（「Monkey」）、Lan助力音箱、Treble Booster","rel":["jimmy-page","ritchie-blackmore"]},"ritchie-blackmore":{"name":"Ritchie Blackmore","cn":"里奇·布莱克摩尔","inst":"guitar","life":"1945–","genre":"nwobhm","band":"deep-purple","mark":"把古典音阶塞进摇滚","tags":["古典音阶","和声小调","速弹前身"],"lead":"他在布鲁斯摇滚里塞进巴赫式的分解和弦，让「速弹」这个词有了雏形。","bio":["session 乐手出身，1968 年参与组建 Deep Purple。他把和声小调、减七琶音与古典乐句带进硬摇滚，《Highway Star》的独奏是这种做法的样板。","1975 年离队组建 Rainbow，进一步把中世纪旋律与摇滚节奏结合。他的演奏有明显的古典训练痕迹：琶音清晰、音阶规整、节奏精准。"],"style":[["和声小调","用带升七级的小调音阶制造异域与古典色彩，区别于纯布鲁斯。"],["分解琶音","快速扫过减七与属七琶音，音与音之间保持均匀颗粒感。"],["古典动机","把巴赫、维瓦尔第式的短动机改成电吉他 riff，再交给乐队合奏。"]],"sig":[[1972,"Machine Head","《Highway Star》的独奏是古典速弹的早期样本。"],[1973,"Made in Japan","现场版《Smoke on the Water》riff 成为入门第一课。"],[1976,"Rainbow Rising","《Stargazer》把交响化的编曲推向极致。"]],"gear":"Fender Stratocaster（ scalloped 指板）、Marshall 音箱、Hornby Skewes Treble Booster","rel":["tony-iommi","yngwie-malmsteen"]},"eddie-van-halen":{"name":"Eddie Van Halen","cn":"艾迪·范·海伦","inst":"guitar","life":"1955–2020","genre":"glam-metal","band":"van-halen","mark":"点弦技术的普及者","tags":["点弦","摇把","Brown Sound"],"lead":"《Eruption》一分四十二秒，把点弦、摇把和失真音色一次性推到所有人面前。","bio":["荷兰移民家庭出身，少年时练古典钢琴与鼓，转吉他后把键盘的双手独立性带了过来。1978 年首张专辑里的《Eruption》几乎是吉他技术的一次公开课。","他改造吉他：把颤音系统装到固定琴桥上、用变阻器控制音箱电压得到「Brown Sound」。他的演奏听起来欢快、跳跃，技术密度极高但不显得吃力。"],"style":[["双手点弦","右手在指板上敲击高音，左手同时按和弦，让一条吉他听起来像两把。"],["摇把俯冲","大量使用俯冲与上拉，把音高变化当成旋律的一部分，而不是装饰。"],["跳跃律动","节奏吉他里加入切分与空弦，听起来像在弹钢琴而不是扫和弦。"]],"sig":[[1978,"Van Halen","《Eruption》定义了现代电吉他独奏的技术上限。"],[1984,"1984","《Jump》用合成器与吉他并置，进入主流。"],[1991,"For Unlawful Carnal Knowledge","《Poundcake》用电钻弹琴。"]],"gear":"Frankenstrat、Marshall Plexi（变阻器改造）、MXR Phase 90","rel":["randy-rhoads","steve-vai"]},"randy-rhoads":{"name":"Randy Rhoads","cn":"兰迪·罗兹","inst":"guitar","life":"1956–1982","genre":"heavy-metal","band":null,"mark":"古典训练出身的金属吉他手","tags":["古典和声","琶音","干净失真"],"lead":"他把古典吉他的琶音与和声学带进重金属，独奏像一段有结构的室内乐。","bio":["少年时接受古典吉他训练，1979 年加入 Ozzy Osbourne 乐队，参与《Blizzard of Ozz》与《Diary of a Madman》。他的独奏有明显的古典结构：主题、发展、再现。","他坚持在演出前热身、上课学理论，把金属吉他当作严肃乐器对待。1982 年巡演途中因飞机事故去世，年仅 25 岁，留下的两张专辑影响了一代金属吉他手。"],"style":[["古典琶音","独奏以分解和弦为骨架，音与音之间有明确的和声走向，而非单纯音阶跑动。"],["层叠和声","在录音室里把吉他独奏叠成三度、五度和声，听起来像弦乐组。"],["克制的失真","音色比同期金属更干净，靠演奏精度而非增益制造力量。"]],"sig":[[1980,"Blizzard of Ozz","《Crazy Train》的 riff 与独奏成为教学范本。"],[1981,"Diary of a Madman","《Flying High Again》展示古典和声与金属节奏的结合。"],[1987,"Tribute","现场录音保存了他几乎全部的独奏语汇。"]],"gear":"Gibson Les Paul Custom、Marshall 音箱、MXR Distortion+","rel":["eddie-van-halen","yngwie-malmsteen"]},"yngwie-malmsteen":{"name":"Yngwie Malmsteen","cn":"英格威·玛姆斯汀","inst":"guitar","life":"1963–","genre":"power-metal","band":null,"mark":"新古典速弹的旗手","tags":["和声小调","扫拨","挖槽指板"],"lead":"他把帕格尼尼的小提琴练习曲原样搬到电吉他上，速度与音准都按古典标准要求。","bio":["瑞典出身，少年时沉迷古典音乐与 Deep Purple。1984 年首张个人专辑《Rising Force》把新古典金属推上台面：和声小调、扫拨琶音、古典式乐句结构。","他以极高的技术标准和同样高的自我评价著称。挖槽指板让推弦更省力、音高更稳定，也让他的揉弦听起来比同期吉他手更宽。"],"style":[["和声小调跑动","以和声小调为主轴，四个八度内均匀跑动，音符密度极高。"],["扫拨琶音","用经济拨弦与扫拨快速穿过三和弦琶音，形成类似键盘的效果。"],["古典揉弦","宽幅慢速揉弦，模仿小提琴的持续颤音。"]],"sig":[[1984,"Rising Force","《Black Star》把古典乐句与金属失真结合。"],[1985,"Marching Out","《I'll See the Light Tonight》的扫拨段落。"],[1988,"Odyssey","《Heaven Tonight》展示更旋律化的一面。"]],"gear":"Fender Stratocaster（挖槽指板）、Marshall 音箱、DOD Overdrive Preamp 250","rel":["ritchie-blackmore","steve-vai"]},"steve-vai":{"name":"Steve Vai","cn":"史蒂夫·范","inst":"guitar","life":"1960–","genre":"prog-metal","band":null,"mark":"把吉他当成管弦乐团","tags":["摇把","多轨和声","戏剧化"],"lead":"他弹吉他像在指挥一支管弦乐团：摇把、反馈、多轨和声，全为叙事服务。","bio":["师从 Joe Satriani，20 岁进入 Frank Zappa 乐队，负责抄谱与演奏最难的段落。1984 年加入 David Lee Roth 乐队，1990 年发行《Passion and Warfare》。","他对吉他硬件的改造近乎偏执：七弦、无品吉他、带摇把的无限延音。他的作品有强烈的叙事性，独奏常有角色与场景感。"],"style":[["摇把语言","用摇把做滑音、颤音、马叫等各种音响，把技巧变成表情。"],["多轨编曲","独奏常叠成四到六轨和声，写成完整的和声进行。"],["节奏错位","在复杂拍号上做切分，让独奏与伴奏形成交叉节奏。"]],"sig":[[1990,"Passion and Warfare","《For the Love of God》把独奏写成完整叙事。"],[1986,"Flex-Able","《The Attitude Song》展示多轨吉他的极限。"],[1999,"The Ultra Zone","融合电子与东方音阶。"]],"gear":"Ibanez JEM、Ibanez Universe 七弦、Carvin 与 Bogner 音箱","rel":["joe-satriani","yngwie-malmsteen"]},"joe-satriani":{"name":"Joe Satriani","cn":"乔·萨特里亚尼","inst":"guitar","life":"1956–","genre":"prog-rock","band":null,"mark":"器乐摇滚的普及者","tags":["旋律优先","连奏","教学"],"lead":"他证明没有主唱也能卖出白金唱片，只要旋律写得像有人在唱。","bio":["曾是 Steve Vai 的吉他老师，1987 年《Surfing with the Alien》用纯器乐进入公告牌前列。他的曲子结构接近流行歌：主题、副歌式乐句、记忆点。","他擅长用摇把与连奏制造歌唱性，也写过大量教学材料。对学生的影响超过他自己的作品数量。"],"style":[["歌唱性主题","每个独奏都有可哼唱的主线，技巧服务于旋律记忆点。"],["连奏与滑音","大量使用击勾弦与滑音连接，减少拨弦的颗粒感，追求流畅。"],["摇把揉弦","用摇把代替左手揉弦，做出更宽的音高摆动。"]],"sig":[[1987,"Surfing with the Alien","《Always with Me, Always with You》成为器乐抒情范本。"],[1989,"Flying in a Blue Dream","同名曲展示多层和声与旋律。"],[1992,"The Extremist","《Summer Song》把器乐写进电台。"]],"gear":"Ibanez JS 系列、Peavey 与 Marshall 音箱、Vox  Wah","rel":["steve-vai","jimi-hendrix"]},"slash":{"name":"Slash","cn":"史莱许","inst":"guitar","life":"1965–","genre":"glam-metal","band":"guns-n-roses","mark":"用 Les Paul 写流行旋律","tags":["Les Paul","布鲁斯摇滚","长句独奏"],"lead":"他的独奏像在唱歌：句子长、落点明确，失真很脏但旋律很甜。","bio":["生于伦敦、长于洛杉矶，1985 年组建 Guns N' Roses。1987 年《Appetite for Destruction》把朋克的粗糙与布鲁斯的旋律结合，卖了三千多万张。","他几乎只用 Gibson Les Paul 与 Marshall 音箱，音色辨识度极高。独奏常从低音区起句、逐步上行，结尾以一个长音收住，结构非常清楚。"],"style":[["长句结构","一个独奏通常是一条完整旋律线，从低到高再回落，不碎片化。"],["脏而甜的音色","增益不低但中频饱满，失真里保留和弦音，听起来温暖。"],["布鲁斯落点","大量使用五声音阶与推弦，落点常在小三度或五度上。"]],"sig":[[1987,"Appetite for Destruction","《Sweet Child O' Mine》的 intro 与独奏。"],[1991,"Use Your Illusion I","《November Rain》的长篇独奏。"],[1995,"Slash's Snakepit","离开 GNR 后的布鲁斯回归。"]],"gear":"Gibson Les Paul Standard（'59 复刻）、Marshall JCM800、Dunlop Cry Baby","rel":["eddie-van-halen","jimmy-page"]},"tom-morello":{"name":"Tom Morello","cn":"汤姆·莫雷洛","inst":"guitar","life":"1964–","genre":"nu-metal","band":null,"mark":"把吉他当唱机用","tags":["打碟音效","开关噪音","无摇把"],"lead":"他不用摇把也不用点弦，只用拨弦开关、摇把和效果器，做出唱盘刮擦与合成器的声音。","bio":["哈佛政治学毕业，在洛杉矶做过说唱歌手。1992 年组建 Rage Against the Machine，把重金属 riff 与嘻哈节奏、政治歌词结合。","他的标志性手法是「开关拨弦」：左手按住琴弦、右手快速拨动拾音器开关，切断信号产生断续的电子音。这让吉他听起来像 DJ 唱盘。"],"style":[["开关断音","用拾音器切换代替拨弦，制造类似打碟的断续音，无需效果器。"],["摇把尖叫","把摇把与哇音、延迟结合，模仿人声与警笛。"],["riff 即采样","把嘻哈采样思维带进吉他写作，短、重复、有攻击性。"]],"sig":[[1992,"Rage Against the Machine","《Killing in the Name》的开关音效。"],[1996,"Evil Empire","《Bulls on Parade》把摇把当唱盘。"],[1999,"The Battle of Los Angeles","《Guerrilla Radio》的节奏型 riff。"]],"gear":"Fender Stratocaster（「Soul Power」）、Marshall 与 Peavey 音箱、DigiTech Whammy","rel":["jimi-hendrix","kurt-cobain"]},"kurt-cobain":{"name":"Kurt Cobain","cn":"科特·柯本","inst":"guitar","life":"1967–1994","genre":"grunge","band":"nirvana","mark":"用失真写童谣","tags":["动态对比","噪音墙","简单和弦"],"lead":"他的歌结构和童谣一样简单，但他把音量当成情绪开关：轻的时候耳语，重的时候整面墙压下来。","bio":["华盛顿州阿伯丁出身，受 Melvins 与 Pixies 影响，把慢速、失真与流行旋律拼在一起。1991 年《Nevermind》把地下摇滚推上主流。","他的吉他演奏技术并不复杂，但极擅长用动态：主歌几乎清音，副歌全开失真，形成强烈的情绪落差。他也常用错误音与噪音作为表达。"],"style":[["动态开关","主歌清音、副歌全失真，用音量而不是和弦变化制造高潮。"],["噪音即情绪","结尾常以失控的反馈与刷弦收场，把失控留在录音里。"],["简化和声","大量使用三和弦与五度，旋律靠人声而非吉他和声推进。"]],"sig":[[1991,"Nevermind","《Smells Like Teen Spirit》定义了九十年代的音量落差。"],[1993,"In Utero","《Heart-Shaped Box》把噪音与旋律并置。"],[1994,"MTV Unplugged in New York","清音版本证明旋律本身足够强。"]],"gear":"Fender Jaguar、Mustang、Univox Hi-Flier、Boss DS-1、Marshall 音箱","rel":["tom-morello","mick-jones"]},"mick-jones":{"name":"Mick Jones","cn":"米克·琼斯","inst":"guitar","life":"1955–","genre":"punk","band":"the-clash","mark":"把雷鬼带上朋克舞台","tags":["反拍","雷鬼切分","粗糙失真"],"lead":"他在朋克的高速里塞进雷鬼的反拍与回声，让 The Clash 不只是快。","bio":["The Clash 的吉他手与主要作曲者之一，1977 年首张专辑是纯粹的伦敦朋克，随后在《London Calling》里加入雷鬼、斯卡、放克与爵士。","他的吉他不追求技巧，而追求质感：粗糙的失真、反拍的切分、偶尔的回声。他让朋克吉他有了空间感。"],"style":[["雷鬼反拍","在二、四拍位置切和弦，制造松弛的律动，与鼓形成错位。"],["粗糙失真","音色不加修饰，保留拨弦噪音，像排练室里的声音。"],["节奏留白","riff 之间留空，让人声与贝斯占据中频。"]],"sig":[[1977,"The Clash","《White Riot》的纯粹冲击。"],[1979,"London Calling","《London Calling》与《Rudie Can't Fail》的雷鬼元素。"],[1980,"Sandinista!","三张唱片把朋克扩展到放克与 dub。"]],"gear":"Gibson Les Paul Junior、Fender Telecaster、Marshall 音箱","rel":["kurt-cobain","johnny-marr"]},"johnny-marr":{"name":"Johnny Marr","cn":"约翰尼·马尔","inst":"guitar","life":"1963–","genre":"post-punk","band":"the-smiths","mark":"用吉他写对位旋律","tags":["琶音","对位","清音"],"lead":"The Smiths 的歌里，人声唱的是一条线，吉他弹的是另一条旋律，两者互不重复。","bio":["1982 年与 Morrissey 组建 The Smiths，四张录音室专辑几乎重新定义了英式独立摇滚的吉他写法。他后来也参与 Electronic、Modest Mouse、The Cribs。","他的吉他几乎不用失真，靠清音、切分与琶音构造层次。写歌时他把吉他当成另一个声部，与人声形成对位而不是伴奏。"],"style":[["对位旋律","吉他弹独立于演唱的旋律线，两者形成和声与节奏上的对话。"],["清音琶音","大量使用清音分解和弦，音色明亮，靠切分制造律动。"],["音区分离","吉他常在高把位活动，给人声留出中频空间。"]],"sig":[[1984,"The Smiths","《This Charming Man》的琶音 riff。"],[1985,"Meat Is Murder","《How Soon Is Now?》的颤音与滑棒。"],[1987,"Strangeways, Here We Come","编曲最完整的一张。"]],"gear":"Fender Telecaster、Rickenbacker 330、Gibson ES-355、Fender Twin","rel":["mick-jones","jimmy-page"]},"james-hetfield":{"name":"James Hetfield","cn":"詹姆斯·海特菲尔德","inst":"guitar","life":"1963–","genre":"thrash","band":"metallica","mark":"右手就是鼓机","tags":["下拨","闷音","节奏吉他"],"lead":"他的右手比大多数人的鼓还准：全下拨、精确闷音，把 riff 变成打击乐。","bio":["Metallica 的主唱与节奏吉他手，1981 年建队。他把英国重金属的 riff 加速，用严格的全下拨（downpicking）制造机械般的精准。","他的音色以中频削薄、低频收紧著称，为的是让 riff 在快速演奏中保持清晰。他也负责大部分 riff 与歌词，是乐队声音的定义者。"],"style":[["全下拨","每一下都向下拨弦，速度靠手腕而非交替拨弦，颗粒更硬。"],["闷音控制","右手掌根精确控制琴桥处闷音，让 riff 有断句和呼吸。"],["切分重音","重音落在反拍或弱拍，制造被推着走的紧迫感。"]],"sig":[[1983,"Kill 'Em All","《Whiplash》的全下拨速度。"],[1986,"Master of Puppets","同名曲的 riff 与中间段落的节奏变化。"],[1991,"Metallica（Black Album）","《Enter Sandman》把重 riff 写进流行电台。"]],"gear":"ESP 与 Gibson Explorer、Mesa/Boogie 音箱、EMG 拾音器","rel":["kerry-king"]},"kerry-king":{"name":"Kerry King","cn":"凯瑞·金","inst":"guitar","life":"1964–","genre":"thrash","band":"slayer","mark":"把不和谐写进鞭击金属","tags":["减和弦","颤音拨弦","双吉他"],"lead":"Slayer 的独奏故意不和谐：减和弦、滑音、尖叫，像在拆解而不是演奏。","bio":["1981 年与 Jeff Hanneman 组建 Slayer，1986 年《Reign in Blood》把鞭击金属推到速度与暴力的极限。他的独奏风格与 Hanneman 不同：更依赖摇把与不和谐音。","他与 Hanneman 的双吉他对位是 Slayer 的核心：两条吉他弹不同的不和谐线，制造混乱中的秩序。"],"style":[["减和弦","大量使用减五度与减七和弦，制造持续的不安与刺痛。"],["摇把尖叫","独奏里用摇把做下坠与尖叫，模拟噪音而非旋律。"],["双吉他对位","与另一把吉他弹不同音程，形成不协和的层叠。"]],"sig":[[1986,"Reign in Blood","《Angel of Death》的速度与混乱。"],[1990,"Seasons in the Abyss","同名曲的慢速压迫。"],[1988,"South of Heaven","把速度放慢，用和声制造阴森。"]],"gear":"BC Rich 与 ESP 吉他、Marshall 音箱、EMG 拾音器","rel":["james-hetfield","dave-lombardo"]},"dimebag-darrell":{"name":"Dimebag Darrell","cn":"戴姆巴格·达雷尔","inst":"guitar","life":"1966–2004","genre":"groove-metal","band":"pantera","mark":"把律动感塞进金属 riff","tags":["律动","摇把","和声独奏"],"lead":"他的 riff 可以让人抖腿：切分精准、音色厚，独奏里又突然变得轻快。","bio":["德州出身，1981 年与哥哥组建 Pantera，1990 年《Cowboys from Hell》确立了他们标志性的律动金属风格。他的吉他兼具重量与弹性。","他的 riff 里有明显的放克与布鲁斯影响，重音常落在反拍。独奏快速、跳跃，常带摇把尖啸，音色极具辨识度。"],"style":[["律动重音","riff 的重音落在反拍或切分点，让身体先反应，再听到重量。"],["摇把尖啸","独奏里用摇把做上拉尖叫与快速俯冲，增加攻击性。"],["跳跃音阶","独奏混用五声、和声小调与布鲁斯音，听起来欢快又危险。"]],"sig":[[1990,"Cowboys from Hell","《Cemetery Gates》展示旋律与重量的平衡。"],[1992,"Vulgar Display of Power","《Walk》的四音 riff 成为律动金属模板。"],[1994,"Far Beyond Driven","《Becoming》的复杂节奏。"]],"gear":"Dean ML（「Rusty」）、Randall RG 100ES、MXR 效果器","rel":["james-hetfield","eddie-van-halen"]},"chuck-schuldiner":{"name":"Chuck Schuldiner","cn":"查克·舒尔迪纳","inst":"guitar","life":"1967–2001","genre":"death-metal","band":"death","mark":"死亡金属的命名者与技术推手","tags":["死亡金属","技术化","渐进结构"],"lead":"他把死亡金属从噪音推进到有和声结构的技术音乐，然后再亲手拆掉它的规则。","bio":["1983 年组建 Death，1987 年《Scream Bloody Gore》被视为死亡金属的起点之一。之后每张专辑都在提高技术难度与和声复杂度。","1990 年代他转向更前卫的结构，《Human》《Individual Thought Patterns》引入无品贝斯与爵士式和声。他 2001 年因脑癌去世。"],"style":[["低吼式 riff","在极低音区快速交替拨弦，配合双踩形成密集音墙。"],["技术化和声","把减和弦、增和弦与半音进行带进死亡金属，超越单纯的暴力。"],["结构实验","后期作品打破主歌副歌结构，用动机发展组织长曲。"]],"sig":[[1987,"Scream Bloody Gore","死亡金属的奠基录音之一。"],[1991,"Human","引入无品贝斯与技术化和声。"],[1995,"Symbolic","技术、旋律与暴力的平衡点。"]],"gear":"B.C. Rich Stealth、Marshall 与 Valvestate 音箱","rel":["ihsahn","james-hetfield"]},"ihsahn":{"name":"Ihsahn","cn":"伊赫桑","inst":"guitar","life":"1975–","genre":"black-metal","band":"emperor","mark":"黑金属里的作曲者","tags":["黑金属","交响编曲","和声小调"],"lead":"他把黑金属的粗糙录音与古典和声、键盘编曲放在一起，让这种音乐有了结构。","bio":["挪威 Emperor 的主唱与吉他手，1994 年《In the Nightside Eclipse》把黑金属的速度、氛围与键盘编曲结合，成为该流派的核心唱片。","解散后他做个人计划，把黑金属、前卫金属与流行结构混合，演奏与制作都由自己完成。"],"style":[["高速 tremolo","右手持续快速交替拨弦，制造连续的音墙而非单个音符。"],["古典和声层","吉他与键盘叠出三度、六度和声，让粗糙音色里出现旋律线。"],["氛围段落","在高速段落之间插入清音与合成器，形成明暗对比。"]],"sig":[[1994,"In the Nightside Eclipse","黑金属氛围化的里程碑。"],[1997,"Anthems to the Welkin at Dusk","速度与编曲更复杂。"],[2006,"The Adversary","个人计划，混合前卫与黑金属。"]],"gear":"Ibanez 与 ESP 吉他、Marshall 音箱、键盘与合成器","rel":["chuck-schuldiner","kerry-king"]},"tosin-abasi":{"name":"Tosin Abasi","cn":"托辛·阿巴西","inst":"guitar","life":"1983–","genre":"djent","band":"periphery","mark":"八弦吉他的节奏建筑师","tags":["八弦","切分","拇指独立"],"lead":"他在八弦吉他上写复合节奏，低音弦当贝斯、高音弦当旋律，一把琴干两件事。","bio":["生于华盛顿，尼日利亚裔。2009 年组建 Animals as Leaders，纯器乐、无主唱，把 djent 的节奏语言推到更复杂的方向。","他的右手用拇指独立拨低音弦，做出类似贝斯的线条；左手在高低音区之间快速切换，形成一把琴上的双声部。"],"style":[["复合节奏","在 4/4 与 7/8 之间切换，重音位移制造漂浮感。"],["拇指独立","右手拇指负责低音线条，其余手指弹和弦与旋律，像钢琴的左右手。"],["八弦音域","用低音弦扩展和声基础，让吉他同时承担贝斯功能。"]],"sig":[[2009,"Animals as Leaders","同名专辑确立八弦器乐的可能性。"],[2014,"The Joy of Motion","《Physical Education》的节奏实验。"],[2016,"The Madness of Many","更自由的即兴与和声。"]],"gear":"Ibanez TAM 系列八弦、Strandberg、Fractal Axe-Fx","rel":["steve-vai","james-hetfield"]},"brian-may":{"name":"Brian May","cn":"布莱恩·梅","inst":"guitar","life":"1947–","genre":"classic-rock","band":null,"mark":"把和声学带进硬摇滚","tags":["自制吉他","多轨和声","琶音"],"lead":"他自己造了那把吉他，也自己算和声：皇后乐队的吉他层，是按合唱团写的。","bio":["天体物理学博士，1963 年与父亲用旧家具木料造出「Red Special」吉他。这把琴的拾音器串联、相位切换与摇把系统，构成了他独特的音色。","他为 Queen 写的吉他段落常叠成十几轨，按四声部和声排列，听起来像铜管或合唱。他也不爱用失真，靠音程与音量制造宏大感。"],"style":[["多轨合唱","把吉他独奏分轨录成三度、五度、八度和声，形成合唱团式的厚度。"],["自制音色","Red Special 的双拾音器串联与相位切换，做出介于单线圈与双线圈之间的独特音色。"],["琶音进行","用快速的琶音铺底，让和声在音型里流动，而不是块状和弦。"]],"sig":[[1975,"A Night at the Opera","《Bohemian Rhapsody》的吉他层与和声编排。"],[1974,"Sheer Heart Attack","《Brighton Rock》的长时间独奏。"],[1980,"The Game","《Save Me》的抒情音色。"]],"gear":"Red Special（自制）、Vox AC30、Treble Booster","rel":["david-gilmour","jimi-hendrix"]},"george-harrison":{"name":"George Harrison","cn":"乔治·哈里森","inst":"guitar","life":"1943–2001","genre":"merseybeat","band":"the-beatles","mark":"把西塔琴与滑棒带进流行","tags":["滑棒","西塔琴","留白"],"lead":"他在披头士的歌里做减法：不抢戏，但每一句都成为记忆点。","bio":["披头士的主音吉他手，也是最早把印度音乐带进西方摇滚的人之一。1965 年《Norwegian Wood》里的西塔琴是一次公开的转向。","他的吉他风格克制、旋律化，常在副歌之间留出空间。后期个人作品《All Things Must Pass》用滑棒与多层吉他写出更舒展的声音。"],"style":[["滑棒","用滑棒演奏旋律线，音与音之间连贯，带有哀歌般的语调。"],["印度音阶","在西塔琴与吉他上使用拉格音阶，改变流行音乐的旋律习惯。"],["克制的独奏","短句为主，落在歌曲的转折处，不追求技术展示。"]],"sig":[[1965,"Rubber Soul","《Norwegian Wood》的西塔琴。"],[1969,"Abbey Road","《Something》的旋律与吉他编排。"],[1970,"All Things Must Pass","三张唱片，滑棒与和声的集大成。"]],"gear":"Fender Stratocaster「Rocky」、Gibson Les Paul、Rickenbacker 360/12、西塔琴","rel":["brian-may","jimi-hendrix"]},"stevie-ray-vaughan":{"name":"Stevie Ray Vaughan","cn":"史蒂维·雷·沃恩","inst":"guitar","life":"1954–1990","genre":"blues-rock","band":null,"mark":"德州布鲁斯的烈度","tags":["重型推弦","超粗琴弦","德州 shuffle"],"lead":"他用 13 号琴弦和重型推弦，把布鲁斯弹得像电锯，也像叹息。","bio":["德州奥斯汀出身，1983 年首张专辑《Texas Flood》让布鲁斯在八十年代重新流行。他的演奏既有 Hendrix 式的音色实验，也有 Albert King 式的重型推弦。","他坚持使用极粗的琴弦与高张力，音色厚实、动态范围大。1990 年因直升机事故去世。"],"style":[["重型推弦","用粗弦做大幅推弦，音高变化缓慢而有压迫感。"],["德州 shuffle","在 shuffle 律动上加入密集的装饰音，听起来像在说话。"],["音色多变","同一场演出里从清音到重失真切换，靠音量旋钮控制。"]],"sig":[[1983,"Texas Flood","《Pride and Joy》的 shuffle 与音色。"],[1984,"Couldn't Stand the Weather","《Scuttle Buttin'》的速度。"],[1989,"In Step","更内敛的布鲁斯与 soul 融合。"]],"gear":"Fender Stratocaster「Number One」、Fender Vibroverb、Tube Screamer","rel":["jimi-hendrix","eric-clapton"]},"john-entwistle":{"name":"John Entwistle","cn":"约翰·恩特维斯尔","inst":"bass","life":"1944–2002","genre":"rock-and-roll","band":"the-who","mark":"把贝斯弹成主音","tags":["高把位","指弹","圆号式音色"],"lead":"在 The Who 里，他弹的不是低音铺底，而是一条和主唱平行的旋律线。","bio":["The Who 的贝斯手，也是乐队里技术最全面的人。他在 Moon 狂暴的鼓点上弹高把位旋律，把贝斯从节奏组里拉出来。","他的音色明亮、颗粒清晰，常被形容像法国号。他也负责乐队的铜管编曲，是少见的能写管乐的摇滚贝斯手。"],"style":[["高把位旋律","在指板中高段演奏，与人声形成对位，而不是跟随和弦根音。"],["指弹颗粒","用指肉拨弦，音头清晰，配合压缩后仍有强烈存在感。"],["铜管式线条","贝斯线像管乐声部一样有呼吸与断句。"]],"sig":[[1967,"The Who Sell Out","《I Can See for Miles》的贝斯推进。"],[1969,"Tommy","摇滚歌剧里的贝斯叙事。"],[1971,"Who's Next","《Baba O'Riley》的持续音型。"]],"gear":"Fender Precision Bass、Gibson Thunderbird、Alembic 定制贝斯","rel":["john-bonham","jaco-pastorius"]},"cliff-burton":{"name":"Cliff Burton","cn":"克利夫·伯顿","inst":"bass","life":"1962–1986","genre":"thrash","band":"metallica","mark":"让贝斯在鞭击金属里被听见","tags":["失真贝斯","和声","哇音"],"lead":"他在鞭击金属的音墙里给贝斯留了位置：失真、哇音、旋律，一样不少。","bio":["1982 年加入 Metallica，参与《Kill 'Em All》《Ride the Lightning》《Master of Puppets》。他有古典与爵士训练，把和声意识带进了金属。","他的贝斯常加失真与哇音，弹奏旋律性乐句而不是只跟根音。《Orion》的间奏是他最完整的展示。1986 年巡演途中因车祸去世。"],"style":[["失真贝斯","用失真与过载让贝斯在吉他音墙中保持存在。"],["旋律化乐句","在 riff 之间弹独立旋律，与吉他形成对位。"],["哇音与和声","用哇音踏板改变音色，配合双音与和弦演奏。"]],"sig":[[1983,"Kill 'Em All","《Anesthesia (Pulling Teeth)》的贝斯独奏。"],[1984,"Ride the Lightning","《For Whom the Bell Tolls》的 intro。"],[1986,"Master of Puppets","《Orion》的间奏。"]],"gear":"Rickenbacker 4001、Aria Pro II、Morley 哇音、Big Muff","rel":["james-hetfield","geddy-lee"]},"jaco-pastorius":{"name":"Jaco Pastorius","cn":"杰科·帕斯托里乌斯","inst":"bass","life":"1951–1987","genre":"jazz-fusion","band":null,"mark":"无品贝斯的革命者","tags":["无品贝斯","泛音","和声"],"lead":"他把贝斯上的品丝拔掉，让低音也能像人声一样滑行与吟唱。","bio":["佛罗里达出身，1976 年同名专辑《Jaco Pastorius》让电贝斯第一次以独奏乐器出现。同年加入 Weather Report，把 fusion 的贝斯推到前台。","他拔掉贝斯品丝、涂上环氧树脂，得到类似大提琴的滑音；同时用泛音、和弦与快速跑动扩展贝斯的和声能力。"],"style":[["无品滑音","去掉品丝后音高连续，可以做出人声般的滑音与颤音。"],["泛音旋律","大量使用自然与人工泛音，把高音区当成旋律区。"],["和弦化贝斯","在贝斯上弹和弦与双音，承担和声而不只是低音。"]],"sig":[[1976,"Jaco Pastorius","《Donna Lee》的无品贝斯独奏。"],[1977,"Heavy Weather","《Birdland》的旋律贝斯。"],[1981,"Word of Mouth","大编制编曲与贝斯主导。"]],"gear":"Fender Jazz Bass（去品、环氧处理）、Acoustic 360 音箱、 chorus 效果器","rel":["john-entwistle","les-claypool"]},"les-claypool":{"name":"Les Claypool","cn":"莱斯·克莱普尔","inst":"bass","life":"1963–","genre":"funk-rock","band":null,"mark":"把贝斯弹成卡通角色","tags":["slap","古怪音色","复节奏"],"lead":"他的贝斯会说话、会蹦跳、会翻白眼，是 Primus 里最像主唱的那件乐器。","bio":["加州出身，1984 年组建 Primus。他的贝斯技术融合放克 slap、金属失真与卡通式的音色变化，几乎所有旋律都由贝斯承担。","他曾参加 Metallica 贝斯手面试但未被选中，这段经历后来成了纪录片素材。他也做个人计划与电影配乐。"],"style":[["slap 与勾弦","大量使用拇指击弦与勾弦，制造弹跳般的节奏。"],["音色扮演","通过效果器与演奏方式模仿说话、动物叫声等非乐器声音。"],["复节奏","贝斯线与鼓的节拍错开，形成持续的不稳定感。"]],"sig":[[1990,"Frizzle Fry","《Too Many Puppies》的贝斯主导。"],[1991,"Sailing the Seas of Cheese","《Jerry Was a Race Car Driver》的 slap 与节奏。"],[1993,"Pork Soda","《My Name Is Mud》的音色实验。"]],"gear":"Carl Thompson 定制贝斯、Fender Jazz Bass、GK 音箱","rel":["jaco-pastorius","john-entwistle"]},"geddy-lee":{"name":"Geddy Lee","cn":"盖迪·李","inst":"bass","life":"1953–","genre":"prog-rock","band":null,"mark":"一边唱一边弹贝斯旋律","tags":["同时演唱","高音贝斯","复杂拍号"],"lead":"他在唱主旋律的同时弹一条完全不同的贝斯线，两件事互不干扰。","bio":["Rush 的主唱、贝斯手与键盘手，1968 年组队。他要在复杂拍号上同时演唱与演奏，这让他发展出独特的贝斯语言。","他的贝斯音色明亮、常加失真与合唱，演奏偏旋律化，与吉他形成对位而非跟随。"],"style":[["人声与贝斯分离","演唱旋律与贝斯线各自独立，形成复调。"],["高音区演奏","在指板中高段活动，让贝斯在混音中清晰可辨。"],["复杂拍号","在 7/8、5/4 等拍号上保持律动稳定。"]],"sig":[[1981,"Moving Pictures","《Tom Sawyer》的贝斯与合成器并行。"],[1976,"2112","长篇组曲里的贝斯结构。"],[1980,"Permanent Waves","《Freewill》的拍号变化。"]],"gear":"Fender Jazz Bass、Rickenbacker 4001、Steinberger、SansAmp","rel":["john-entwistle","cliff-burton"]},"john-bonham":{"name":"John Bonham","cn":"约翰·博纳姆","inst":"drums","life":"1948–1980","genre":"blues-rock","band":"led-zeppelin","mark":"摇滚鼓的力度标准","tags":["重击","律动","三连音"],"lead":"他不用节拍器，也不叠录：一下是一下，鼓声的重量来自身体本身。","bio":["Led Zeppelin 的鼓手，以巨大的音量与精准的律动著称。他的鼓组录音几乎不做过量化，保留自然的推拉感。","他的标志是「Bonham 三连音」：在过门里把三连音铺在鼓组上，形成滚动般的推进。他也善用空间，留白与重击交替。"],"style":[["身体重量","靠手臂与踏板的整体发力，音量大但不失控。"],["推拉律动","不严格对齐节拍器，让鼓点略微前后移动，产生呼吸感。"],["三连音过门","在军鼓与嗵鼓间快速滚动三连音，形成标志性的推进。"]],"sig":[[1971,"Led Zeppelin IV","《When the Levee Breaks》的鼓声成为采样经典。"],[1969,"Led Zeppelin II","《Moby Dick》的鼓独奏。"],[1975,"Physical Graffiti","《Kashmir》的复杂律动。"]],"gear":"Ludwig 鼓组（26 寸底鼓）、Paiste 镲片","rel":["keith-moon","john-entwistle"]},"keith-moon":{"name":"Keith Moon","cn":"基思·穆恩","inst":"drums","life":"1946–1978","genre":"rock-and-roll","band":"the-who","mark":"把鼓当主角的疯子","tags":["爆裂","填充","不按拍"],"lead":"他几乎不在拍子上，但整支乐队被他推着往前跑。","bio":["The Who 的鼓手，以爆炸式的演奏与舞台破坏闻名。他的鼓点充满填充与突变，常与贝斯形成对位而不是同步。","他不追求稳定，追求动能。Pete Townshend 的吉他 riff 与 Entwistle 的贝斯线之间，Moon 用不停的滚动填补空隙。"],"style":[["持续填充","几乎每个空隙都塞入嗵鼓与镲片，鼓点密度极高。"],["前推律动","重音常落在拍前，制造被追赶的紧迫感。"],["与贝斯对位","不跟随贝斯根音，而是另走一条节奏线。"]],"sig":[[1965,"My Generation","《My Generation》的爆裂鼓点。"],[1969,"Tommy","摇滚歌剧中的鼓叙事。"],[1973,"Quadrophenia","复杂编曲里的鼓层次。"]],"gear":"Premier 鼓组、Zildjian 镲片","rel":["john-bonham","dave-lombardo"]},"dave-lombardo":{"name":"Dave Lombardo","cn":"戴夫·隆巴多","inst":"drums","life":"1965–","genre":"thrash","band":"slayer","mark":"鞭击金属的双踩引擎","tags":["双踩","blast beat","精准"],"lead":"他的双踩是 Slayer 的地基：速度极快，但每一下都能数清。","bio":["Slayer 的原始鼓手，1981 年入队。他把双踩、blast beat 与快速的嗵鼓过门带进鞭击金属，成为该流派的节奏标准。","他的演奏力量与精准并存，即使在高速度下也保持清晰的音头。他也参与 Fantômas、Mr. Bungle 等实验项目。"],"style":[["双踩持续","底鼓以十六分或三十二分持续推进，形成压迫感。"],["blast beat","军鼓、底鼓与镲片高速交替，制造音墙。"],["精准过门","高速嗵鼓过门仍保持每个音清晰。"]],"sig":[[1986,"Reign in Blood","《Angel of Death》的速度与双踩。"],[1990,"Seasons in the Abyss","同名曲的沉重律动。"],[1998,"Diabolus in Musica","更 groove 的节奏处理。"]],"gear":"Tama 鼓组、Paiste 镲片、双踩踏板","rel":["kerry-king","keith-moon"]},"neil-peart":{"name":"Neil Peart","cn":"尼尔·皮尔特","inst":"drums","life":"1952–2020","genre":"prog-rock","band":null,"mark":"把鼓组编成管弦乐","tags":["复杂拍号","编曲","歌词"],"lead":"他的鼓不是伴奏，是编曲：每个段落都有对应的节奏结构，像给歌词配乐。","bio":["1974 年加入 Rush，同时担任主要词作者。他的鼓组庞大、演奏精确，在复杂拍号上构建层次。","他受爵士鼓手影响很深，把摇摆感带进硬摇滚。他也写旅行随笔，是少见的兼具文学与技术的鼓手。"],"style":[["拍号建筑","在 7/8、5/4、9/8 之间切换，用节奏结构对应歌词段落。"],["鼓组编曲","把鼓与镲片分组，按和声与情绪分配音色。"],["爵士触感","在硬摇滚框架内保留摇摆与即兴的呼吸。"]],"sig":[[1981,"Moving Pictures","《Tom Sawyer》与《YYZ》的节奏设计。"],[1976,"2112","长篇组曲的鼓结构。"],[1984,"Grace Under Pressure","电子鼓与复杂节奏结合。"]],"gear":"Ludwig 与 DW 鼓组、Paiste 镲片、电子打击板","rel":["john-bonham","geddy-lee"]},"jon-lord":{"name":"Jon Lord","cn":"乔恩·洛德","inst":"keys","life":"1941–2012","genre":"classic-rock","band":"deep-purple","mark":"把 Hammond 管风琴接到失真音箱","tags":["Hammond","古典动机","失真键盘"],"lead":"他把管风琴插进 Marshall 音箱，让键盘也能像吉他一样咆哮。","bio":["Deep Purple 的键盘手与创始人之一。他把 Hammond C3 管风琴经过失真与前级推入音箱，得到类似吉他的撕裂音色。","他与 Ritchie Blackmore 的吉他对飙是 Deep Purple 的核心。他也写古典化的组曲，把管弦乐结构带进硬摇滚。"],"style":[["失真管风琴","Hammond 经 Marshall 音箱过载，音色粗粝、有攻击性。"],["古典动机","在 solo 里引用巴赫与浪漫派乐句，与吉他形成对位。"],["音色层叠","管风琴、钢琴与合成器叠用，撑起编曲厚度。"]],"sig":[[1970,"Deep Purple in Rock","《Child in Time》的管风琴与吉他对飙。"],[1972,"Machine Head","《Highway Star》的键盘独奏。"],[1969,"Concerto for Group and Orchestra","摇滚乐队与管弦乐团的合作。"]],"gear":"Hammond C3、Leslie 音箱、Marshall 前级、Mellotron","rel":["ritchie-blackmore","rick-wakeman"]},"rick-wakeman":{"name":"Rick Wakeman","cn":"里克·韦克曼","inst":"keys","life":"1949–","genre":"prog-rock","band":"yes","mark":"把键盘堆成管弦乐团","tags":["Mellotron","合成器","古典改编"],"lead":"他在舞台上摆十几台键盘，把摇滚乐队变成一支没有弦乐的管弦乐团。","bio":["Yes 的键盘手，也是 session 乐手，参与过 David Bowie 的《Hunky Dory》。他的演奏把古典钢琴技巧、Mellotron 与合成器结合。","他以庞大的键盘阵列与华丽的独奏著称，也写过摇滚与管弦乐的大型作品。他的演奏是七十年代前卫摇滚的听觉标志之一。"],"style":[["Mellotron 弦乐","用 Mellotron 模拟弦乐与合唱，撑起编曲的恢宏感。"],["古典钢琴","快速音阶与琶音直接来自古典训练。"],["合成器层次","Moog 与 ARP 合成器叠在钢琴上，形成多声部。"]],"sig":[[1971,"Fragile","《Roundabout》的键盘前奏。"],[1972,"Close to the Edge","长篇组曲中的键盘结构。"],[1973,"The Six Wives of Henry VIII","纯器乐的个人专辑。"]],"gear":"Mellotron、Minimoog、ARP 2600、Hammond、Steinway 钢琴","rel":["jon-lord"]}};
+Object.keys(PLAYERS).forEach(k => { PLAYERS[k].id = k; });
+const playerById = PLAYERS;
+const playersByGenre = {};
+Object.keys(PLAYERS).forEach(k => {
+  const p = PLAYERS[k];
+  (playersByGenre[p.genre] = playersByGenre[p.genre] || []).push(p);
+});
+Object.keys(playersByGenre).forEach(g => playersByGenre[g].sort((a, b) => (a.life || '').localeCompare(b.life || '')));
+const INST_CN = { guitar: '吉他', bass: '贝斯', drums: '鼓', keys: '键盘' };
+
+const playerIndex = Object.keys(PLAYERS).map(k => {
+  const p = PLAYERS[k];
+  const hay = (p.name + ' ' + (p.cn || '') + ' ' + (p.band || '') + ' ' + (p.mark || '') + ' ' + (p.tags || []).join(' ') + ' ' +
+    (p.lead || '') + ' ' + (p.bio || []).join(' ') + ' ' + (p.style || []).map(s => s.join(' ')).join(' ') + ' ' +
+    (p.sig || []).map(a => a.join(' ')).join(' ')).toLowerCase();
+  return { p, hay };
+});
+
+function playerByName(name){
+  const q = normName(name);
+  if (!q) return null;
+  for (const k in PLAYERS){
+    const p = PLAYERS[k];
+    if (normName(p.name) === q || normName(p.cn) === q) return p;
+  }
+  for (const k in PLAYERS){
+    const p = PLAYERS[k];
+    const a = normName(p.name), b = normName(p.cn);
+    if ((a.length >= 4 && q.includes(a)) || (b.length >= 2 && q.includes(b))) return p;
+  }
+  return null;
+}
+
+function playerBand(p){
+  if (!p.band) return null;
+  const q = normName(p.band);
+  for (const k in BANDS){
+    if (normName(BANDS[k].name) === q || normName(BANDS[k].en) === q) return BANDS[k];
+  }
+  for (const k in BANDS){
+    const q2 = normName(BANDS[k].name);
+    if (q.length >= 3 && (q.includes(q2) || q2.includes(q))) return BANDS[k];
+  }
+  return null;
+}
+
+/* 流派面板里的乐手区块 */
+function playersBlock(n){
+  const ps = playersByGenre[n.id] || [];
+  if (!ps.length) return '';
+  return `<div class="p-sec">Heroes · 乐手<span class="sec-n">${ps.length} 位</span></div>
+  <div class="plys">
+    ${ps.map(p => `<button class="ply" data-player="${p.id}" data-pgenre="${n.id}">
+      <span class="pl-inst">${INST_CN[p.inst] || p.inst}<em>${esc(p.life || '')}</em></span>
+      <b>${esc(p.name)}</b>
+      <span class="pl-cn">${esc(p.cn || '')}</span>
+      <p>${esc(p.mark || '')}</p>
+      <span class="pl-go">读档案 ›</span>
+    </button>`).join('')}
+  </div>`;
+}
+
+/* ---------- 乐手二级页 ---------- */
+const playerPage = document.getElementById('playerPage');
+const ppScroll = document.getElementById('ppScroll');
+const ppCrumb = document.getElementById('ppCrumb');
+let ppOpen = false, ppFromIndex = false;
+
+function openPlayer(id, initial){
+  const p = PLAYERS[id];
+  if (!p) return;
+  const g = byId[p.genre];
+  const fam = g ? FAM[g.fam] : FAM[Object.keys(FAM)[0]];
+  playerPage.style.setProperty('--fam', fam.c);
+  if (!initial) ppFromIndex = false;
+  ppCrumb.textContent = (g ? g.cn + ' · ' : '') + 'PLAYER FILE';
+  const band = playerBand(p);
+  const rels = (p.rel || []).map(r => PLAYERS[r]).filter(Boolean);
+  const same = Object.keys(PLAYERS).map(k => PLAYERS[k]).filter(x => x.inst === p.inst && x.id !== p.id).slice(0, 6);
+
+  ppScroll.innerHTML = `
+    <div class="bp-hero">
+      <div class="bp-kicker"><i></i>${esc(INST_CN[p.inst] || p.inst)}<span style="margin-left:auto">${esc(p.life || '')}</span></div>
+      <h2 class="bp-name">${esc(p.name)}</h2>
+      <p class="bp-en">${esc(p.cn || '')}</p>
+      <div class="bp-meta">
+        ${g ? `<span>${esc(g.cn)}</span>` : ''}
+        ${band ? `<span>${esc(band.name)}</span>` : ''}
+        <span>${(p.sig || []).length} 张关键唱片</span>
+      </div>
+    </div>
+    <p class="pl-mark">「${esc(p.mark || '')}」</p>
+    <p class="bp-lead">${esc(p.lead || '')}</p>
+    ${(p.tags || []).length ? `<div class="bp-tags">${p.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>` : ''}
+
+    <div class="p-sec">Story · 档案</div>
+    <div class="pl-bio">${(p.bio || []).map(t => `<p>${esc(t)}</p>`).join('')}</div>
+
+    ${(p.style || []).length ? `<div class="p-sec">Style · 怎么弹</div>
+    <div class="bp-hear">${p.style.map((s, i) => `<div><b>${String(i + 1).padStart(2, '0')}</b><p><strong>${esc(s[0])}</strong>${esc(s[1])}</p></div>`).join('')}</div>` : ''}
+
+    ${(p.sig || []).length ? `<div class="p-sec">Signature · 听这三张</div>
+    <div class="bp-discs">${p.sig.map(a => `<div><b>${a[0]}</b><span>${esc(a[1])}</span><em>${esc(a[2] || '')}</em></div>`).join('')}</div>` : ''}
+
+    ${p.gear ? `<div class="p-sec">Gear · 家伙事</div>
+    <div class="bp-end"><b>RIG</b>${esc(p.gear)}</div>` : ''}
+
+    ${band ? `<div class="p-sec">In the band · 所在乐队</div>
+    <div class="bp-rel"><button data-pl-band="${band.id}">${esc(band.name)}<small>${(band.story || []).length} 章故事</small></button></div>` : ''}
+
+    ${rels.length ? `<div class="p-sec">Related · 同代乐手</div>
+    <div class="bp-rel">${rels.map(r => `<button data-player="${r.id}">${esc(r.name)}<small>${esc(INST_CN[r.inst] || '')}</small></button>`).join('')}</div>` : ''}
+
+    ${same.length ? `<div class="p-sec">Also on ${esc(INST_CN[p.inst] || '')}</div>
+    <div class="bp-rel">${same.map(r => `<button data-player="${r.id}">${esc(r.name)}</button>`).join('')}</div>` : ''}
+
+    <div class="bp-foot">乐手档案为人工整理的通行说法与听感描述，不逐句考据；设备与年份以公开发行的正式作品为准。</div>
+  `;
+  ppScroll.querySelectorAll('[data-player]').forEach(el => {
+    el.addEventListener('click', () => { openPlayer(el.dataset.player); ppScroll.scrollTop = 0; });
+  });
+  ppScroll.querySelectorAll('[data-pl-band]').forEach(el => {
+    el.addEventListener('click', () => { openBand(el.dataset.plBand); });
+  });
+  ppScroll.scrollTop = 0;
+  playerPage.classList.add('on');
+  ppOpen = true;
+}
+
+function closePlayer(){
+  playerPage.classList.remove('on');
+  ppOpen = false;
+}
+
+function openPlayerIndex(){
+  playerPage.style.setProperty('--fam', '#ffb26b');
+  ppCrumb.textContent = 'PLAYER INDEX';
+  ppFromIndex = true;
+  const order = ['guitar', 'bass', 'drums', 'keys'];
+  const instCount = i => Object.keys(PLAYERS).filter(k => PLAYERS[k].inst === i).length;
+  const groups = order.map(inst => {
+    const ps = Object.keys(PLAYERS).map(k => PLAYERS[k]).filter(p => p.inst === inst);
+    if (!ps.length) return '';
+    return `<div class="idx-g">
+      <div class="idx-t static"><i></i><b>${INST_CN[inst]}</b><em></em><span>${ps.length} 位</span></div>
+      <div class="bp-rel">${ps.map(p => `<button data-player="${p.id}">${esc(p.name)}<small>${esc(p.life || '')}</small></button>`).join('')}</div>
+    </div>`;
+  }).join('');
+  ppScroll.innerHTML = `
+    <div class="bp-hero">
+      <div class="bp-kicker"><i></i>HEROES<span style="margin-left:auto">${Object.keys(PLAYERS).length} FILES</span></div>
+      <h2 class="bp-name">吉他英雄<br>与乐手档案</h2>
+      <p class="bp-en">players who changed the vocabulary</p>
+      <div class="bp-meta"><span>按乐器分组</span><span>${order.filter(i => instCount(i)).map(i => instCount(i) + ' ' + INST_CN[i]).join(' / ')}</span></div>
+    </div>
+    <p class="bp-lead">流派是地图上的街区，乐手是街区里真正走路的人。这里写他们各自改了什么说法：怎么按弦、怎么留白、怎么把噪音变成语言。</p>
+    <div class="idx">${groups}</div>
+    <div class="bp-foot">收录标准：对演奏语汇有可见影响、且有可考的代表唱片。不是排行榜。</div>
+  `;
+  ppScroll.querySelectorAll('[data-player]').forEach(el => {
+    el.addEventListener('click', () => { openPlayer(el.dataset.player); ppScroll.scrollTop = 0; });
+  });
+  ppScroll.scrollTop = 0;
+  playerPage.classList.add('on');
+  ppOpen = true;
+}
+
+document.getElementById('btnPlayers').addEventListener('click', () => { openPlayerIndex(); if (panel.classList.contains('open')) deselect(); });
+document.getElementById('ppClose').addEventListener('click', closePlayer);
+document.getElementById('ppBack').addEventListener('click', () => {
+  if (ppFromIndex) openPlayerIndex();
+  else closePlayer();
+});
+
+/* ================= 移动端抽屉：拖拽延伸至全屏 ================= */
+(function(){
+  const panelEl = document.getElementById('panel');
+  const grab = document.getElementById('pGrab');
+  const pScroll = document.getElementById('pScroll');
+  if (!panelEl || !grab) return;
+
+  const isPhone = () => window.matchMedia('(max-width:720px)').matches;
+  const vh = () => window.innerHeight || document.documentElement.clientHeight;
+  let active = false, startY = 0, startH = 0, curH = 0, moved = 0, lastT = 0, lastY = 0, vel = 0, pid = null;
+
+  function lockBody(on){
+    document.body.classList.toggle('panel-full', on);
+  }
+  function clearInline(){
+    panelEl.style.height = '';
+    panelEl.style.transform = '';
+  }
+  function begin(y){
+    if (!isPhone() || !panelEl.classList.contains('open')) return;
+    active = true; moved = 0; vel = 0;
+    startY = y; lastY = y; lastT = performance.now();
+    startH = Math.round(panelEl.getBoundingClientRect().height);
+    panelEl.classList.add('dragging');
+    panelEl.classList.remove('full');
+    clearInline();
+    panelEl.style.height = startH + 'px';
+  }
+  function move(y){
+    if (!active) return;
+    const now = performance.now();
+    const dt = Math.max(1, now - lastT);
+    vel = (lastY - y) / dt;
+    lastY = y; lastT = now;
+    const dy = startY - y;
+    moved = dy;
+    const fullH = vh();
+    curH = Math.max(72, Math.min(fullH, startH + dy));
+    panelEl.style.height = curH + 'px';
+    panelEl.style.transform = 'translateY(0)';
+  }
+  function end(){
+    if (!active) return;
+    active = false;
+    panelEl.classList.remove('dragging');
+    const fullH = vh();
+    const target = curH || startH;
+    const flight = target > fullH * .82 || (vel > .55 && target > fullH * .55);
+    const drop = target < fullH * .42 && (moved < -50 || vel < -.55);
+    clearInline();
+    curH = 0;
+    if (flight){
+      panelEl.classList.add('full');
+      lockBody(true);
+    } else if (drop){
+      panelEl.classList.remove('full');
+      lockBody(false);
+      deselect();
+    } else {
+      panelEl.classList.remove('full');
+      lockBody(false);
+    }
+  }
+
+  grab.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    pid = e.touches[0].identifier;
+    begin(e.touches[0].clientY);
+  }, { passive: true });
+  grab.addEventListener('touchmove', e => {
+    for (const t of e.touches){ if (t.identifier === pid){ move(t.clientY); break; } }
+    if (active) e.preventDefault();
+  }, { passive: false });
+  grab.addEventListener('touchend', end);
+  grab.addEventListener('touchcancel', end);
+
+  let mouseDown = false;
+  grab.addEventListener('mousedown', e => { mouseDown = true; begin(e.clientY); e.preventDefault(); });
+  window.addEventListener('mousemove', e => { if (mouseDown && active) move(e.clientY); });
+  window.addEventListener('mouseup', () => { if (mouseDown){ mouseDown = false; end(); } });
+
+  grab.addEventListener('click', () => {
+    if (!isPhone() || Math.abs(moved) > 10) return;
+    const on = panelEl.classList.toggle('full');
+    lockBody(on);
+  });
+
+  /* 全屏时下拉正文顶部，继续向下拉可收回中间档 */
+  if (pScroll){
+    let sy = 0, pulling = false;
+    pScroll.addEventListener('touchstart', e => {
+      if (!isPhone() || e.touches.length !== 1) return;
+      sy = e.touches[0].clientY;
+      pulling = pScroll.scrollTop <= 0 && panelEl.classList.contains('full');
+    }, { passive: true });
+    pScroll.addEventListener('touchmove', e => {
+      if (!pulling) return;
+      const dy = e.touches[0].clientY - sy;
+      if (dy <= 0) return;
+      panelEl.style.transform = 'translateY(' + Math.min(dy * .55, 120) + 'px)';
+    }, { passive: true });
+    pScroll.addEventListener('touchend', e => {
+      if (!pulling) return;
+      pulling = false;
+      const dy = (e.changedTouches[0].clientY - sy);
+      panelEl.style.transform = '';
+      if (dy > 120){
+        panelEl.classList.remove('full');
+        lockBody(false);
+      }
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    if (active) return;
+    if (!isPhone()){
+      panelEl.classList.remove('full');
+      lockBody(false);
+      clearInline();
+    }
+  });
+})();
 
 </script>
 </body>
