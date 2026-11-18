@@ -315,6 +315,7 @@ body.panel-open .legend{opacity:.55}
 .bp-back{font-size:16px;padding-bottom:2px}
 .bp-crumb{flex:1;font-size:10px;letter-spacing:.2em;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bpScroll{top:46px;padding:18px 20px 34px}
+#ppScroll{top:46px;padding:18px 20px 34px}
 
 .bp-hero{margin:0 0 4px}
 .bp-kicker{display:flex;align-items:center;gap:7px;font-size:9.5px;letter-spacing:.18em;color:var(--faint);margin-bottom:9px}
@@ -442,16 +443,24 @@ body.panel-open .legend{opacity:.55}
 /* ========== 移动端：抽屉可拖拽延伸到全屏 ========== */
 .p-grab{display:none}
 @media (max-width:720px){
-  .p-grab{display:flex;align-items:center;justify-content:center;height:20px;margin:-4px 0 2px;
-    touch-action:none;cursor:grab}
+  .p-grab{display:flex;align-items:center;justify-content:center;height:22px;margin:-4px 0 0;
+    touch-action:none;cursor:grab;position:relative;z-index:6;
+    background:linear-gradient(to bottom,rgba(255,255,255,.05),transparent);
+    border-radius:12px 12px 0 0}
+  .panel>.p-scroll{top:22px}
+  .panel.full>.p-scroll{top:22px}
   .p-grab i{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.24);transition:.2s}
   .panel.dragging{transition:none!important;will-change:height,transform}
   .panel.dragging .p-grab i,.panel.full .p-grab i{width:56px;background:rgba(255,255,255,.42)}
-  .panel.full{height:100dvh!important;max-height:100dvh;border-radius:0!important;border-left:none;border-right:none}
+  .panel{transition:transform .5s cubic-bezier(.2,.8,.2,1),height .34s cubic-bezier(.2,.8,.2,1)}
+  .panel.full{height:100vh!important;height:100dvh!important;max-height:100vh;max-height:100dvh;
+    border-radius:0!important;border-left:none;border-right:none}
   .panel.full::before{display:none}
   .panel.full .p-body{padding-bottom:max(28px,env(safe-area-inset-bottom))}
   body.panel-full .tb-year{opacity:.5}
-  .band-page.full,.band-page{inset:0}
+  .band-page{inset:0}
+  .band-page.on{z-index:7}
+  .panel.full .band-page{border-radius:0}
   .plys{grid-template-columns:1fr}
   .ply{padding:12px 13px}
   .ply p{-webkit-line-clamp:3}
@@ -1048,6 +1057,8 @@ function deselect(closeOnly){
     if (p.el) p.el.classList.remove('sel');
   }
   state.sel = null;
+  if (typeof closeBand === 'function') closeBand();
+  if (typeof closePlayer === 'function') closePlayer();
   panel.classList.remove('open','full');
   document.body.classList.remove('panel-open','panel-full');
   panel.style.height = ''; panel.style.transform = '';
@@ -1058,6 +1069,7 @@ document.getElementById('btnClose').addEventListener('click', () => deselect());
 document.getElementById('btnHome').addEventListener('click', () => deselect());
 document.getElementById('btnAbout').addEventListener('click', renderAbout);
 document.getElementById('btnBands').addEventListener('click', () => {
+  if (typeof closePlayer === 'function') closePlayer();
   panel.classList.add('open');
   document.body.classList.add('panel-open');
   openBandIndex();
@@ -1335,6 +1347,7 @@ let bpOpen = false, bpFrom = null, bpFromIndex = false;
 function openBand(id, fromId){
   const b = bandById[id];
   if (!b) return;
+  if (typeof closePlayer === 'function') closePlayer();
   const g = byId[b.from] || null;
   const fam = g ? FAM[g.fam] : FAM[Object.keys(FAM)[0]];
   bandPage.style.setProperty('--fam', fam.c);
@@ -1410,6 +1423,7 @@ function closeBand(){
 
 /* ---------- 乐队档案总索引 ---------- */
 function openBandIndex(){
+  if (typeof closePlayer === 'function') closePlayer();
   bandPage.style.setProperty('--fam', '#ffb26b');
   bpCrumb.textContent = 'BAND INDEX';
   bpFromIndex = true;
@@ -1456,6 +1470,8 @@ document.getElementById('bpClose').addEventListener('click', () => deselect());
 
 function renderAbout(){
   state.sel = null;
+  if (typeof closeBand === 'function') closeBand();
+  if (typeof closePlayer === 'function') closePlayer();
   panel.style.setProperty('--fam', '#ffb26b');
   panel.style.setProperty('--fxa', '#ffb26b99');
   pScroll.innerHTML = `
@@ -1942,6 +1958,7 @@ const ppCrumb = document.getElementById('ppCrumb');
 let ppOpen = false, ppFromIndex = false;
 
 function openPlayer(id, initial){
+  if (typeof closeBand === 'function') closeBand();
   const p = PLAYERS[id];
   if (!p) return;
   const g = byId[p.genre];
@@ -2008,6 +2025,7 @@ function closePlayer(){
 }
 
 function openPlayerIndex(){
+  if (typeof closeBand === 'function') closeBand();
   playerPage.style.setProperty('--fam', '#ffb26b');
   ppCrumb.textContent = 'PLAYER INDEX';
   ppFromIndex = true;
@@ -2040,134 +2058,97 @@ function openPlayerIndex(){
   ppOpen = true;
 }
 
-document.getElementById('btnPlayers').addEventListener('click', () => { openPlayerIndex(); if (panel.classList.contains('open')) deselect(); });
+document.getElementById('btnPlayers').addEventListener('click', () => {
+  if (typeof closeBand === 'function') closeBand();
+  panel.classList.add('open');
+  document.body.classList.add('panel-open');
+  openPlayerIndex();
+});
 document.getElementById('ppClose').addEventListener('click', closePlayer);
 document.getElementById('ppBack').addEventListener('click', () => {
   if (ppFromIndex) openPlayerIndex();
   else closePlayer();
 });
 
-/* ================= 移动端抽屉：拖拽延伸至全屏 ================= */
+/* ================= 移动端抽屉：滚动自动延伸至全屏 ================= */
 (function(){
   const panelEl = document.getElementById('panel');
   const grab = document.getElementById('pGrab');
-  const pScroll = document.getElementById('pScroll');
-  if (!panelEl || !grab) return;
+  if (!panelEl) return;
+
+  const scrollers = ['pScroll', 'bpScroll', 'ppScroll']
+    .map(id => document.getElementById(id)).filter(Boolean);
+  const pages = ['bandPage', 'playerPage']
+    .map(id => document.getElementById(id)).filter(Boolean);
 
   const isPhone = () => window.matchMedia('(max-width:720px)').matches;
-  const vh = () => window.innerHeight || document.documentElement.clientHeight;
-  let active = false, startY = 0, startH = 0, curH = 0, moved = 0, lastT = 0, lastY = 0, vel = 0, pid = null;
 
-  function lockBody(on){
+  function setFull(on){
+    if (!isPhone()) on = false;
+    panelEl.classList.toggle('full', on);
     document.body.classList.toggle('panel-full', on);
-  }
-  function clearInline(){
     panelEl.style.height = '';
     panelEl.style.transform = '';
   }
-  function begin(y){
-    if (!isPhone() || !panelEl.classList.contains('open')) return;
-    active = true; moved = 0; vel = 0;
-    startY = y; lastY = y; lastT = performance.now();
-    startH = Math.round(panelEl.getBoundingClientRect().height);
-    panelEl.classList.add('dragging');
-    panelEl.classList.remove('full');
-    clearInline();
-    panelEl.style.height = startH + 'px';
-  }
-  function move(y){
-    if (!active) return;
-    const now = performance.now();
-    const dt = Math.max(1, now - lastT);
-    vel = (lastY - y) / dt;
-    lastY = y; lastT = now;
-    const dy = startY - y;
-    moved = dy;
-    const fullH = vh();
-    curH = Math.max(72, Math.min(fullH, startH + dy));
-    panelEl.style.height = curH + 'px';
-    panelEl.style.transform = 'translateY(0)';
-  }
-  function end(){
-    if (!active) return;
-    active = false;
-    panelEl.classList.remove('dragging');
-    const fullH = vh();
-    const target = curH || startH;
-    const flight = target > fullH * .82 || (vel > .55 && target > fullH * .55);
-    const drop = target < fullH * .42 && (moved < -50 || vel < -.55);
-    clearInline();
-    curH = 0;
-    if (flight){
-      panelEl.classList.add('full');
-      lockBody(true);
-    } else if (drop){
-      panelEl.classList.remove('full');
-      lockBody(false);
-      deselect();
-    } else {
-      panelEl.classList.remove('full');
-      lockBody(false);
-    }
-  }
 
-  grab.addEventListener('touchstart', e => {
-    if (e.touches.length !== 1) return;
-    pid = e.touches[0].identifier;
-    begin(e.touches[0].clientY);
-  }, { passive: true });
-  grab.addEventListener('touchmove', e => {
-    for (const t of e.touches){ if (t.identifier === pid){ move(t.clientY); break; } }
-    if (active) e.preventDefault();
-  }, { passive: false });
-  grab.addEventListener('touchend', end);
-  grab.addEventListener('touchcancel', end);
-
-  let mouseDown = false;
-  grab.addEventListener('mousedown', e => { mouseDown = true; begin(e.clientY); e.preventDefault(); });
-  window.addEventListener('mousemove', e => { if (mouseDown && active) move(e.clientY); });
-  window.addEventListener('mouseup', () => { if (mouseDown){ mouseDown = false; end(); } });
-
-  grab.addEventListener('click', () => {
-    if (!isPhone() || Math.abs(moved) > 10) return;
-    const on = panelEl.classList.toggle('full');
-    lockBody(on);
+  /* 1) 正文向上滚动一段 → 自动全屏 */
+  const THRESHOLD = 70;
+  scrollers.forEach(sc => {
+    sc.addEventListener('scroll', () => {
+      if (!isPhone()) return;
+      if (sc.scrollTop > THRESHOLD && !panelEl.classList.contains('full')) setFull(true);
+    }, { passive: true });
   });
 
-  /* 全屏时下拉正文顶部，继续向下拉可收回中间档 */
-  if (pScroll){
-    let sy = 0, pulling = false;
-    pScroll.addEventListener('touchstart', e => {
-      if (!isPhone() || e.touches.length !== 1) return;
-      sy = e.touches[0].clientY;
-      pulling = pScroll.scrollTop <= 0 && panelEl.classList.contains('full');
-    }, { passive: true });
-    pScroll.addEventListener('touchmove', e => {
-      if (!pulling) return;
-      const dy = e.touches[0].clientY - sy;
-      if (dy <= 0) return;
-      panelEl.style.transform = 'translateY(' + Math.min(dy * .55, 120) + 'px)';
-    }, { passive: true });
-    pScroll.addEventListener('touchend', e => {
-      if (!pulling) return;
-      pulling = false;
-      const dy = (e.changedTouches[0].clientY - sy);
-      panelEl.style.transform = '';
-      if (dy > 120){
-        panelEl.classList.remove('full');
-        lockBody(false);
-      }
+  /* 2) 二级页（乐队档案 / 乐手档案）打开即全屏 */
+  if (pages.length && window.MutationObserver){
+    const sync = () => {
+      if (!isPhone()) return;
+      setFull(pages.some(p => p.classList.contains('on')));
+    };
+    const mo = new MutationObserver(sync);
+    pages.forEach(p => mo.observe(p, { attributes: true, attributeFilter: ['class'] }));
+  }
+
+  /* 3) 手柄点击切换全屏 / 半屏 */
+  if (grab){
+    grab.addEventListener('click', () => {
+      if (!isPhone() || !panelEl.classList.contains('open')) return;
+      setFull(!panelEl.classList.contains('full'));
     });
   }
 
-  window.addEventListener('resize', () => {
-    if (active) return;
-    if (!isPhone()){
-      panelEl.classList.remove('full');
-      lockBody(false);
-      clearInline();
-    }
+  /* 4) 全屏时，滚到顶再向下拉 → 收回半屏 */
+  const PULL = 90;
+  scrollers.forEach(sc => {
+    let sy = null;
+    sc.addEventListener('touchstart', e => {
+      if (!isPhone() || e.touches.length !== 1) return;
+      sy = sc.scrollTop <= 0 ? e.touches[0].clientY : null;
+    }, { passive: true });
+    sc.addEventListener('touchmove', e => {
+      if (sy === null || !panelEl.classList.contains('full')) return;
+      const dy = e.touches[0].clientY - sy;
+      if (dy > 0) panelEl.style.transform = 'translateY(' + Math.min(dy * .5, 90) + 'px)';
+    }, { passive: true });
+    sc.addEventListener('touchend', e => {
+      if (sy === null) return;
+      const dy = e.changedTouches[0].clientY - sy;
+      sy = null;
+      if (!panelEl.classList.contains('full')) { panelEl.style.transform = ''; return; }
+      panelEl.style.transform = '';
+      if (dy > PULL) setFull(false);
+    });
+    sc.addEventListener('touchcancel', () => { sy = null; panelEl.style.transform = ''; });
   });
+
+  /* 5) 关闭面板 / 切回桌面宽度时复位 */
+  const pClose = document.getElementById('btnClose');
+  if (pClose) pClose.addEventListener('click', () => setFull(false));
+  window.addEventListener('resize', () => { if (!isPhone()) setFull(false); });
+
+  /* 初始：面板未打开时确保无 full 残留 */
+  if (!panelEl.classList.contains('open')) setFull(false);
 })();
 
 </script>
